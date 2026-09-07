@@ -76,7 +76,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* RSS Banner con Transizione a Dissolvenza */
+  /* RSS Banner */
   .rss-banner {
     background: rgba(232,163,61,0.1);
     border: 1px solid var(--amber);
@@ -87,25 +87,16 @@
     min-height: 68px;
   }
   .rss-title { font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 4px; letter-spacing: 0.5px; }
-  .rss-content-box {
-    opacity: 1;
-    transition: opacity 0.4s ease-in-out;
-  }
-  .rss-content-box.fade-out {
-    opacity: 0;
-  }
+  .rss-content-box { opacity: 1; transition: opacity 0.4s ease-in-out; }
+  .rss-content-box.fade-out { opacity: 0; }
   .rss-item-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
   .rss-item-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; line-height: 1.3; }
 
   .daychip{
     display:inline-flex; align-items:center; gap:7px;
-    font-size: 13px;
-    padding: 7px 12px;
-    border-radius: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    line-height:1.3;
+    font-size: 13px; padding: 7px 12px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim); line-height:1.3;
   }
   .daychip b{ color: var(--text); font-weight:600; }
   .daychip.scolastico{ background: var(--green-soft); border-color: rgba(79,168,143,0.35); }
@@ -118,80 +109,41 @@
 
   .calbar{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top: 8px; }
   .calbar-label{ font-size: 11.5px; color: var(--text-dim); margin-right: 2px; }
-  .calopt{
-    font-size: 11.5px; padding: 5px 9px; border-radius: 7px;
-    border: 1px solid var(--border); color: var(--text-dim);
-    cursor:pointer; user-select:none;
-  }
+  .calopt{ font-size: 11.5px; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); color: var(--text-dim); cursor:pointer; user-select:none; }
   .calopt.active{ background: var(--amber); color: #1b1305; border-color: var(--amber); font-weight: 600; }
 
   .tabbar{ display:flex; gap:8px; margin: 18px 0 10px; }
-  .tab{
-    flex:1; text-align:center; padding: 11px 8px; border-radius: 12px;
-    border: 1px solid var(--border); background: var(--surface);
-    color: var(--text-dim); font-size: 14px; font-weight: 600;
-    cursor:pointer; user-select:none;
-  }
+  .tab{ flex:1; text-align:center; padding: 11px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor:pointer; user-select:none; }
   .tab.active{ background: var(--surface-2); color: var(--text); border-color: var(--amber); }
 
-  .dirbar{
-    display:flex; gap:6px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 12px;
-    padding: 4px; margin-bottom: 18px;
-  }
-  .dirbtn{
-    flex:1; text-align:center; padding: 9px 6px; border-radius: 9px;
-    font-size: 13px; font-weight: 500; color: var(--text-dim);
-    cursor:pointer; user-select:none;
-  }
+  .dirbar{ display:flex; gap:6px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
+  .dirbtn{ flex:1; text-align:center; padding: 9px 6px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--text-dim); cursor:pointer; user-select:none; }
   .dirbtn.active{ background: var(--amber); color: #1b1305; font-weight: 600; }
 
-  .next-card{
-    border-radius: 16px; padding: 18px 18px 16px;
-    background: linear-gradient(155deg, var(--surface-2), var(--surface));
-    border: 1px solid rgba(232,163,61,0.4);
-    margin-bottom: 22px; position: relative; overflow:hidden;
-  }
+  .next-card{ border-radius: 16px; padding: 18px 18px 16px; background: linear-gradient(155deg, var(--surface-2), var(--surface)); border: 1px solid rgba(232,163,61,0.4); margin-bottom: 22px; position: relative; overflow:hidden; }
   .next-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background: var(--amber); opacity:.8; }
   .next-label{ font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 10px; }
   .next-main{ display:flex; align-items:center; gap:12px; }
-  .roundel{
-    flex:none; width: 42px; height:42px; border-radius: 50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216;
-  }
+  .roundel{ flex:none; width: 42px; height:42px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216; }
   .next-times{ font-family:'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; line-height:1.1; }
   .next-sub{ margin-top: 8px; font-size: 13px; color: var(--text-dim); }
   .next-when{ margin-top: 10px; font-size: 13px; color: var(--amber); font-weight: 600; }
 
-  .map-card{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 22px;
-  }
+  .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 22px; }
   .map-header{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px; }
   .map-title{ font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .map-actions{ display: flex; align-items: center; gap: 6px; }
   .loc-badge{ font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--text-dim); }
-  .gps-btn {
-    background: var(--amber-soft); border: 1px solid rgba(232,163,61,0.4);
-    color: var(--amber); padding: 4px 8px; border-radius: 6px;
-    font-size: 11px; font-weight: 600; cursor: pointer; user-select: none;
-  }
+  .gps-btn { background: var(--amber-soft); border: 1px solid rgba(232,163,61,0.4); color: var(--amber); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
 
-  #map{ height: 240px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #12181f; }
+  #map{ height: 260px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #12181f; }
 
   .custom-div-icon { background: none; border: none; }
-  .map-pin {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px;
-    color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff;
-  }
+  .map-pin { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff; }
   .pin-dep { background: var(--amber); }
   .pin-arr { background: var(--green); color: #fff; }
+  .pin-cp { width: 18px; height: 18px; background: var(--surface-2); border: 2px solid var(--amber); color: var(--amber); font-size: 9px; }
+  .pin-cp.passed { background: var(--green); border-color: #fff; color: #fff; }
   .pin-test { background: #e11d48; color: #fff; }
   .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
 
@@ -205,7 +157,6 @@
 
   .listtitle{ font-family:'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; margin: 4px 0 10px; }
   
-  /* Layout Classico Corse */
   .trip{ display:flex; align-items:center; gap:12px; padding: 12px 4px; border-bottom: 1px solid var(--border); }
   .trip.passed{ opacity: 0.38; }
   .roundel-sm{ flex:none; width: 34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 10.5px; color:#0e1216; }
@@ -242,7 +193,7 @@
     </div>
   </header>
 
-  <!-- Banner Avvisi RSS Filtrato con Dissolvenza -->
+  <!-- Banner Avvisi RSS -->
   <div id="rssBanner" class="rss-banner">
     <div class="rss-title">📢 AVVISI E NEWS TUA ABRUZZO</div>
     <div id="rssContentBox" class="rss-content-box">
@@ -290,12 +241,25 @@
 </div>
 
 <script>
-/* COORDINATE FERMATE + NUOVO PUNTO TEST */
+/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE */
+const OCRE_CHECKPOINTS = [
+  { id: 0, name: "Terminal Collemaggio", lat: 42.3444, lng: 13.4009 },
+  { id: 1, name: "Sant'Elia SS17/SS5bis", lat: 42.339161, lng: 13.40928 },
+  { id: 2, name: "Via Marsicana 123", lat: 42.3093335, lng: 13.4429412 },
+  { id: 3, name: "CP3", lat: 42.305916, lng: 13.453780 },
+  { id: 4, name: "CP4", lat: 42.300466, lng: 13.453139 },
+  { id: 5, name: "SR 5 bis Vestina", lat: 42.2778821, lng: 13.4621699 },
+  { id: 6, name: "San Felice - Via Libertà", lat: 42.2888, lng: 13.4621 },
+  { id: 7, name: "CP7", lat: 42.291561, lng: 13.458896 },
+  { id: 8, name: "San Panfilo - Via Silone", lat: 42.2866969, lng: 13.47107 },
+  { id: 9, name: "San Panfilo d'Ocre Piazza", lat: 42.2882, lng: 13.4830 }
+];
+
 const STOPS_COORDS = {
   ocre: { lat: 42.2882, lng: 13.4830, label: "San Panfilo d'Ocre (Piazza)" },
   demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
   laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" },
-  testPoint: { lat: 42.3662767, lng: 13.4208838, label: "Punto Test GPS (42.3662767, 13.4208838)" }
+  testPoint: { lat: 42.3662767, lng: 13.4208838, label: "Punto Test GPS" }
 };
 
 /* ORARI */
@@ -446,12 +410,89 @@ function tripVisible(trip, dayInfo){
   return trip.giorno ? trip.giorno(dayInfo.dow) : true;
 }
 
-let state = { route: "demetrio", dir: "fromAQ", viewedDate: new Date() };
+let state = { route: "ocre", dir: "fromAQ", viewedDate: new Date() };
 const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
 const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 
+/* MAPPA & TRACCIAMENTO STRADALE */
 let map = null, depMarker = null, arrMarker = null, testMarker = null, userMarker = null, watchGpsId = null;
-let alertTriggered = false;
+let routePolyline = null, cpMarkers = [];
+let lastPassedCPIndex = -1;
+let stopAlertTriggered = false;
+
+function createDivIcon(className, text) {
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  testMarker = L.marker([STOPS_COORDS.testPoint.lat, STOPS_COORDS.testPoint.lng], {
+    icon: createDivIcon('pin-test', 'TEST')
+  }).bindPopup(`<b>${STOPS_COORDS.testPoint.label}</b>`).addTo(map);
+
+  updateMapMarkers();
+  requestGpsPermission(false);
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+  
+  // Resetta vecchi marker
+  cpMarkers.forEach(m => map.removeLayer(m));
+  cpMarkers = [];
+  if (routePolyline) map.removeLayer(routePolyline);
+
+  const { dep, arr } = getRouteCoords();
+  document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
+
+  if (depMarker) depMarker.setLatLng([dep.lat, dep.lng]);
+  else depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
+  depMarker.bindPopup(`<b>Partenza:</b><br>${dep.label}`);
+
+  if (arrMarker) arrMarker.setLatLng([arr.lat, arr.lng]);
+  else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
+  arrMarker.bindPopup(`<b>Arrivo:</b><br>${arr.label}`);
+
+  // Se siamo sulla tratta Ocre FromAQ, disegna la strada esatta con OSRM e mostra i checkpoint
+  if (state.route === "ocre" && state.dir === "fromAQ") {
+    fetchOSRMRoute();
+    OCRE_CHECKPOINTS.forEach((cp, idx) => {
+      if(idx === 0 || idx === OCRE_CHECKPOINTS.length - 1) return; // Salta primo e ultimo
+      const passedClass = idx <= lastPassedCPIndex ? 'passed' : '';
+      const m = L.marker([cp.lat, cp.lng], {
+        icon: createDivIcon(`pin-cp ${passedClass}`, idx)
+      }).bindPopup(`<b>Checkpoint ${idx}:</b> ${cp.name}`).addTo(map);
+      cpMarkers.push(m);
+    });
+  }
+
+  fitMapBounds();
+}
+
+/* API OSRM PER SNAP TO ROAD */
+async function fetchOSRMRoute() {
+  try {
+    const coordsStr = OCRE_CHECKPOINTS.map(cp => `${cp.lng},${cp.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.routes && data.routes.length > 0) {
+      const routeCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      if (routePolyline) map.removeLayer(routePolyline);
+      routePolyline = L.polyline(routeCoords, { color: '#e8a33d', weight: 4, opacity: 0.8 }).addTo(map);
+    }
+  } catch(e) {
+    console.log("Errore OSRM Route:", e);
+  }
+}
 
 function getRouteCoords() {
   let dep, arr;
@@ -465,53 +506,6 @@ function getRouteCoords() {
   return { dep, arr };
 }
 
-function createDivIcon(className, text) {
-  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
-}
-
-function initMap() {
-  if (map) return;
-  map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
-
-  // Marker per le coordinate del Test GPS richieste
-  testMarker = L.marker([STOPS_COORDS.testPoint.lat, STOPS_COORDS.testPoint.lng], {
-    icon: createDivIcon('pin-test', 'TEST')
-  }).bindPopup(`<b>${STOPS_COORDS.testPoint.label}</b>`).addTo(map);
-
-  updateMapMarkers();
-  requestGpsPermission(false);
-}
-
-function updateMapMarkers() {
-  if (!map) return;
-  const { dep, arr } = getRouteCoords();
-  document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
-
-  if (depMarker) {
-    depMarker.setLatLng([dep.lat, dep.lng]);
-    depMarker.setPopupContent(`<b>Partenza:</b><br>${dep.label}`);
-  } else {
-    depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') })
-      .bindPopup(`<b>Partenza:</b><br>${dep.label}`).addTo(map);
-  }
-
-  if (arrMarker) {
-    arrMarker.setLatLng([arr.lat, arr.lng]);
-    arrMarker.setPopupContent(`<b>Arrivo:</b><br>${arr.label}`);
-  } else {
-    arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') })
-      .bindPopup(`<b>Arrivo:</b><br>${arr.label}`).addTo(map);
-  }
-
-  fitMapBounds();
-}
-
 function fitMapBounds() {
   if (!map) return;
   const points = [];
@@ -519,7 +513,6 @@ function fitMapBounds() {
   if (arrMarker) points.push(arrMarker.getLatLng());
   if (testMarker) points.push(testMarker.getLatLng());
   if (userMarker) points.push(userMarker.getLatLng());
-  
   if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
 }
 
@@ -539,7 +532,6 @@ function requestGpsPermission(userTriggered = false) {
   }
 
   badge.textContent = "GPS in ricerca...";
-
   if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
   }
@@ -551,7 +543,7 @@ function requestGpsPermission(userTriggered = false) {
       updateUserLocation(pos);
       startContinuousTracking();
       if (userTriggered) {
-        alert("🎯 GPS attivo! Verrai avvisato se ti avvicini al punto di Test (42.3662767, 13.4208838).");
+        alert("🎯 GPS attivo! Riceverai la notifica di 'Richiedi Fermata' quando il bus si avvicinerà alla destinazione.");
       }
     },
     err => {
@@ -571,9 +563,11 @@ function startContinuousTracking() {
   );
 }
 
+/* LOGICA BUS vs A PIEDI CON CHECKPOINT E VELOCITÀ */
 function updateUserLocation(pos) {
   const lat = pos.coords.latitude;
   const lng = pos.coords.longitude;
+  const speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0; // km/h
   const userCoords = [lat, lng];
 
   if (userMarker) userMarker.setLatLng(userCoords);
@@ -583,17 +577,51 @@ function updateUserLocation(pos) {
     }).bindPopup("<b>La tua Posizione</b>").addTo(map);
   }
 
-  const distTest = getDistanceMeters(lat, lng, STOPS_COORDS.testPoint.lat, STOPS_COORDS.testPoint.lng);
   const badge = document.getElementById('locStatusBadge');
-  badge.textContent = `GPS: ${Math.round(distTest)}m dal test`;
+  badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
 
-  if (distTest < 400 && !alertTriggered) {
-    alertTriggered = true;
-    if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
-    alert("🔔 ALLARME GPS FUNZIONANTE!\nSei vicino alle coordinate di test (42.3662767, 13.4208838)!");
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("🔔 ALLARME GPS FUNZIONANTE!", { body: "Sei nei pressi del punto di test!" });
+  // Se siamo sulla tratta Ocre
+  if (state.route === "ocre" && state.dir === "fromAQ") {
+    
+    // Controlla avanzamento sequenziale dei Checkpoint (entro 180 metri)
+    OCRE_CHECKPOINTS.forEach((cp, idx) => {
+      const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
+      if (dist < 180 && idx === lastPassedCPIndex + 1) {
+        lastPassedCPIndex = idx;
+        updateMapMarkers(); // Aggiorna grafica checkpoint superato
+      }
+    });
+
+    const distToArr = getDistanceMeters(lat, lng, STOPS_COORDS.ocre.lat, STOPS_COORDS.ocre.lng);
+    const isMovingFast = speed > 12; // Velocità minima bus (>12 km/h)
+    const passedKeyCheckpoints = lastPassedCPIndex >= 4; // Deve aver superato almeno il CP4 lungo il percorso
+
+    // TRIGGER NOTIFICA E VIBRAZIONE PER FERMATA
+    if ((isMovingFast || passedKeyCheckpoints) && distToArr < 450 && !stopAlertTriggered) {
+      triggerStopNotification();
     }
+  }
+}
+
+function triggerStopNotification() {
+  stopAlertTriggered = true;
+
+  // Vibrazione Forte Sequenziale [Vibra, Pausa, Vibra, Pausa, Vibra]
+  if ("vibrate" in navigator) {
+    navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
+  }
+
+  const title = "🔔 RICHIEDI FERMATA!";
+  const msg = "🚌 Il bus si sta avvicinando alla fermata di San Panfilo d'Ocre. Premi il pulsante prenotazione!";
+
+  alert(`${title}\n\n${msg}`);
+
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, {
+      body: msg,
+      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+      vibrate: [1000, 250, 1000, 250, 1000]
+    });
   }
 }
 
@@ -614,15 +642,12 @@ async function fetchTUARss() {
         return keywords.some(kw => text.includes(kw));
       });
 
-      // Se non ci sono avvisi specifici sulle linee del territorio, mostra gli ultimi avvisi generali TUA
       rssItems = filtered.length > 0 ? filtered : data.items.slice(0, 5);
 
       if (rssItems.length > 0) {
         document.getElementById('rssBanner').style.display = 'block';
         showRssItem(0);
-        if (rssItems.length > 1) {
-          startRssCarousel();
-        }
+        if (rssItems.length > 1) startRssCarousel();
       }
     }
   } catch(e) {
@@ -656,7 +681,7 @@ function renderTabs(){
   Object.entries(ROUTES).forEach(([key,r])=>{
     const el = document.createElement("div");
     el.className = "tab" + (state.route===key ? " active":""); el.textContent = r.label;
-    el.onclick = ()=>{ state.route=key; state.dir="fromAQ"; renderAll(); updateMapMarkers(); };
+    el.onclick = ()=>{ state.route=key; state.dir="fromAQ"; lastPassedCPIndex = -1; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     routeTabs.appendChild(el);
   });
 
@@ -664,7 +689,7 @@ function renderTabs(){
   Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
     const el = document.createElement("div");
     el.className = "dirbtn" + (state.dir===key ? " active":""); el.textContent = d.label;
-    el.onclick = ()=>{ state.dir=key; renderAll(); updateMapMarkers(); };
+    el.onclick = ()=>{ state.dir=key; lastPassedCPIndex = -1; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     dirTabs.appendChild(el);
   });
 }
@@ -715,7 +740,6 @@ function renderNextCard(){
   `;
 }
 
-/* LISTA CORSE CLASSICA RIPRISTINATA E DETTAGLIATA */
 function renderTripList(){
   const container = document.getElementById("tripList"); container.innerHTML = "";
   const dirInfo = ROUTES[state.route].directions[state.dir];
