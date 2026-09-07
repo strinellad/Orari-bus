@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-<!-- Leaflet CSS & JS (Gratuito, Nessuna API Key richiesta) -->
+<!-- Leaflet CSS & JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -160,11 +160,11 @@
     font-size: 11px; font-weight: 600; cursor: pointer; user-select: none;
   }
 
-  #map{ height: 260px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #e5e3df; }
+  #map{ height: 240px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #12181f; }
 
   .custom-div-icon { background: none; border: none; }
   .map-pin {
-    width: 26px; height: 26px; border-radius: 50%;
+    width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12px;
     color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff;
@@ -172,6 +172,9 @@
   .pin-dep { background: var(--amber); }
   .pin-arr { background: var(--green); color: #fff; }
   .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
+
+  .leaflet-popup-content-wrapper { background: var(--surface-2); color: var(--text); border-radius: 8px; border: 1px solid var(--border); }
+  .leaflet-popup-tip { background: var(--surface-2); }
 
   .datebar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
   .datebar .datebtns{ display:flex; align-items:center; gap:4px; }
@@ -251,14 +254,14 @@
 </div>
 
 <script>
-/* COORDINATE FERMATE */
+/* COORDINATE ESATTE FERMATE */
 const STOPS_COORDS = {
-  ocre: { lat: 42.2852820, lng: 13.4737461, label: "San Panfilo d'Ocre (Piazza)" },
+  ocre: { lat: 42.2882, lng: 13.4830, label: "San Panfilo d'Ocre (Piazza)" },
   demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
   laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Bus Collemaggio" }
 };
 
-/* ORARI */
+/* ORARI PDF TUA */
 const demetrioToAQ = [
   {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
   {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
@@ -334,15 +337,15 @@ const ROUTES = {
   demetrio: {
     label: "San Demetrio",
     directions: {
-      toAQ:   { label: "San Demetrio → L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ },
-      fromAQ: { label: "L'Aquila → San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+      fromAQ: { label: "L'Aquila ➔ San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+      toAQ:   { label: "San Demetrio ➔ L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ }
     }
   },
   ocre: {
     label: "San Panfilo d'Ocre",
     directions: {
-      toAQ:   { label: "San Panfilo → L'Aquila", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ },
-      fromAQ: { label: "L'Aquila → San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
+      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
+      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
     }
   }
 };
@@ -406,7 +409,7 @@ function tripVisible(trip, dayInfo){
   return trip.giorno ? trip.giorno(dayInfo.dow) : true;
 }
 
-let state = { route: "demetrio", dir: "toAQ", viewedDate: new Date() };
+let state = { route: "demetrio", dir: "fromAQ", viewedDate: new Date() };
 const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
 const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 
@@ -425,7 +428,7 @@ function getRouteCoords() {
 }
 
 function createDivIcon(className, text) {
-  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
 function initMap() {
@@ -433,10 +436,9 @@ function initMap() {
   map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  // Mappa standard OpenStreetMap - Completamente gratuita, NO API KEY
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap'
   }).addTo(map);
 
   updateMapMarkers();
@@ -448,11 +450,23 @@ function updateMapMarkers() {
   const { dep, arr } = getRouteCoords();
   document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
 
-  if (depMarker) depMarker.setLatLng([dep.lat, dep.lng]);
-  else depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
+  if (depMarker) {
+    depMarker.setLatLng([dep.lat, dep.lng]);
+    depMarker.setPopupContent(`<b>Partenza:</b><br>${dep.label}`);
+  } else {
+    depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') })
+      .bindPopup(`<b>Partenza:</b><br>${dep.label}`)
+      .addTo(map);
+  }
 
-  if (arrMarker) arrMarker.setLatLng([arr.lat, arr.lng]);
-  else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
+  if (arrMarker) {
+    arrMarker.setLatLng([arr.lat, arr.lng]);
+    arrMarker.setPopupContent(`<b>Arrivo:</b><br>${arr.label}`);
+  } else {
+    arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') })
+      .bindPopup(`<b>Arrivo:</b><br>${arr.label}`)
+      .addTo(map);
+  }
 
   fitMapBounds();
 }
@@ -462,8 +476,15 @@ function fitMapBounds() {
   const points = [];
   if (depMarker) points.push(depMarker.getLatLng());
   if (arrMarker) points.push(arrMarker.getLatLng());
-  if (userMarker) points.push(userMarker.getLatLng());
-  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
+  
+  if (userMarker) {
+    const uPos = userMarker.getLatLng();
+    if (uPos.lat >= 42.0 && uPos.lat <= 42.7 && uPos.lng >= 13.0 && uPos.lng <= 14.0) {
+      points.push(uPos);
+    }
+  }
+  
+  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
 }
 
 function requestGpsPermission(userTriggered = false) {
@@ -484,8 +505,8 @@ function requestGpsPermission(userTriggered = false) {
       if (userTriggered) map.setView([pos.coords.latitude, pos.coords.longitude], 15);
     },
     err => {
-      badge.textContent = "Servono permessi GPS";
-      badge.style.color = "var(--danger)";
+      badge.textContent = "GPS Disattivato";
+      badge.style.color = "var(--text-dim)";
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
@@ -506,7 +527,7 @@ function updateUserLocation(pos) {
   else {
     userMarker = L.marker(userCoords, {
       icon: L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-user"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] })
-    }).addTo(map);
+    }).bindPopup("<b>La tua Posizione</b>").addTo(map);
     fitMapBounds();
   }
 }
@@ -516,7 +537,7 @@ function renderTabs(){
   Object.entries(ROUTES).forEach(([key,r])=>{
     const el = document.createElement("div");
     el.className = "tab" + (state.route===key ? " active":""); el.textContent = r.label;
-    el.onclick = ()=>{ state.route=key; state.dir="toAQ"; renderAll(); updateMapMarkers(); };
+    el.onclick = ()=>{ state.route=key; state.dir="fromAQ"; renderAll(); updateMapMarkers(); };
     routeTabs.appendChild(el);
   });
 
@@ -610,11 +631,11 @@ document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.o
 setInterval(renderClockAndChip, 30000);
 renderAll(); loadOverride(); initMap();
 </script>
-  <script>
+
+<script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
 </script>
-
 </body>
 </html>
