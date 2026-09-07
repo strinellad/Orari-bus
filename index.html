@@ -76,7 +76,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* RSS Banner */
   .rss-banner {
     background: rgba(232,163,61,0.1);
     border: 1px solid var(--amber);
@@ -193,7 +192,6 @@
     </div>
   </header>
 
-  <!-- Banner Avvisi RSS -->
   <div id="rssBanner" class="rss-banner">
     <div class="rss-title">📢 AVVISI E NEWS TUA ABRUZZO</div>
     <div id="rssContentBox" class="rss-content-box">
@@ -241,22 +239,22 @@
 </div>
 
 <script>
-/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE */
+/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE (AGGIORNATE) */
 const OCRE_CHECKPOINTS = [
   { id: 0, name: "Terminal Collemaggio", lat: 42.3444, lng: 13.4009 },
   { id: 1, name: "Sant'Elia SS17/SS5bis", lat: 42.339161, lng: 13.40928 },
   { id: 2, name: "Via Marsicana 123", lat: 42.3093335, lng: 13.4429412 },
   { id: 3, name: "CP3", lat: 42.305916, lng: 13.453780 },
   { id: 4, name: "CP4", lat: 42.300466, lng: 13.453139 },
-  { id: 5, name: "SR 5 bis Vestina", lat: 42.2778821, lng: 13.4621699 },
-  { id: 6, name: "San Felice - Via Libertà", lat: 42.2888, lng: 13.4621 },
+  { id: 5, name: "SR 5 bis Vestina", lat: 42.295833, lng: 13.453444 },
+  { id: 6, name: "San Felice - Via Libertà 12", lat: 42.288540, lng: 13.468110 },
   { id: 7, name: "CP7", lat: 42.291561, lng: 13.458896 },
   { id: 8, name: "San Panfilo - Via Silone", lat: 42.2866969, lng: 13.47107 },
-  { id: 9, name: "San Panfilo d'Ocre Piazza", lat: 42.2882, lng: 13.4830 }
+  { id: 9, name: "San Panfilo d'Ocre Arrivo", lat: 42.285278, lng: 13.473750 }
 ];
 
 const STOPS_COORDS = {
-  ocre: { lat: 42.2882, lng: 13.4830, label: "San Panfilo d'Ocre (Piazza)" },
+  ocre: { lat: 42.285278, lng: 13.473750, label: "San Panfilo d'Ocre (Arrivo)" },
   demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
   laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" },
   testPoint: { lat: 42.3662767, lng: 13.4208838, label: "Punto Test GPS" }
@@ -345,8 +343,8 @@ const ROUTES = {
   ocre: {
     label: "San Panfilo d'Ocre",
     directions: {
-      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
-      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
+      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Arrivo", trips: ocreFromAQ },
+      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Arrivo", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
     }
   }
 };
@@ -444,7 +442,6 @@ function initMap() {
 function updateMapMarkers() {
   if (!map) return;
   
-  // Resetta vecchi marker
   cpMarkers.forEach(m => map.removeLayer(m));
   cpMarkers = [];
   if (routePolyline) map.removeLayer(routePolyline);
@@ -460,11 +457,10 @@ function updateMapMarkers() {
   else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
   arrMarker.bindPopup(`<b>Arrivo:</b><br>${arr.label}`);
 
-  // Se siamo sulla tratta Ocre FromAQ, disegna la strada esatta con OSRM e mostra i checkpoint
   if (state.route === "ocre" && state.dir === "fromAQ") {
     fetchOSRMRoute();
     OCRE_CHECKPOINTS.forEach((cp, idx) => {
-      if(idx === 0 || idx === OCRE_CHECKPOINTS.length - 1) return; // Salta primo e ultimo
+      if(idx === 0 || idx === OCRE_CHECKPOINTS.length - 1) return;
       const passedClass = idx <= lastPassedCPIndex ? 'passed' : '';
       const m = L.marker([cp.lat, cp.lng], {
         icon: createDivIcon(`pin-cp ${passedClass}`, idx)
@@ -476,7 +472,6 @@ function updateMapMarkers() {
   fitMapBounds();
 }
 
-/* API OSRM PER SNAP TO ROAD */
 async function fetchOSRMRoute() {
   try {
     const coordsStr = OCRE_CHECKPOINTS.map(cp => `${cp.lng},${cp.lat}`).join(';');
@@ -543,7 +538,7 @@ function requestGpsPermission(userTriggered = false) {
       updateUserLocation(pos);
       startContinuousTracking();
       if (userTriggered) {
-        alert("🎯 GPS attivo! Riceverai la notifica di 'Richiedi Fermata' quando il bus si avvicinerà alla destinazione.");
+        alert("🎯 GPS attivo! Notifica e vibrazione attive per la fermata.");
       }
     },
     err => {
@@ -563,11 +558,10 @@ function startContinuousTracking() {
   );
 }
 
-/* LOGICA BUS vs A PIEDI CON CHECKPOINT E VELOCITÀ */
 function updateUserLocation(pos) {
   const lat = pos.coords.latitude;
   const lng = pos.coords.longitude;
-  const speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0; // km/h
+  const speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
   const userCoords = [lat, lng];
 
   if (userMarker) userMarker.setLatLng(userCoords);
@@ -580,23 +574,19 @@ function updateUserLocation(pos) {
   const badge = document.getElementById('locStatusBadge');
   badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
 
-  // Se siamo sulla tratta Ocre
   if (state.route === "ocre" && state.dir === "fromAQ") {
-    
-    // Controlla avanzamento sequenziale dei Checkpoint (entro 180 metri)
     OCRE_CHECKPOINTS.forEach((cp, idx) => {
       const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
       if (dist < 180 && idx === lastPassedCPIndex + 1) {
         lastPassedCPIndex = idx;
-        updateMapMarkers(); // Aggiorna grafica checkpoint superato
+        updateMapMarkers();
       }
     });
 
     const distToArr = getDistanceMeters(lat, lng, STOPS_COORDS.ocre.lat, STOPS_COORDS.ocre.lng);
-    const isMovingFast = speed > 12; // Velocità minima bus (>12 km/h)
-    const passedKeyCheckpoints = lastPassedCPIndex >= 4; // Deve aver superato almeno il CP4 lungo il percorso
+    const isMovingFast = speed > 12;
+    const passedKeyCheckpoints = lastPassedCPIndex >= 4;
 
-    // TRIGGER NOTIFICA E VIBRAZIONE PER FERMATA
     if ((isMovingFast || passedKeyCheckpoints) && distToArr < 450 && !stopAlertTriggered) {
       triggerStopNotification();
     }
@@ -606,7 +596,6 @@ function updateUserLocation(pos) {
 function triggerStopNotification() {
   stopAlertTriggered = true;
 
-  // Vibrazione Forte Sequenziale [Vibra, Pausa, Vibra, Pausa, Vibra]
   if ("vibrate" in navigator) {
     navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
   }
@@ -625,7 +614,6 @@ function triggerStopNotification() {
   }
 }
 
-/* FETCH E FILTRO FEED RSS TUA ABRUZZO CON DISSOLVENZA */
 let rssItems = [];
 let currentRssIndex = 0;
 let rssInterval = null;
