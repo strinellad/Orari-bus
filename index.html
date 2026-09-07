@@ -143,7 +143,6 @@
   .pin-arr { background: var(--green); color: #fff; }
   .pin-cp { width: 18px; height: 18px; background: var(--surface-2); border: 2px solid var(--amber); color: var(--amber); font-size: 9px; }
   .pin-cp.passed { background: var(--green); border-color: #fff; color: #fff; }
-  .pin-test { background: #e11d48; color: #fff; }
   .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
 
   .leaflet-popup-content-wrapper { background: var(--surface-2); color: var(--text); border-radius: 8px; border: 1px solid var(--border); }
@@ -210,7 +209,7 @@
       <span id="mapTitle" class="map-title">🗺️ Mappa Percorso</span>
       <div class="map-actions">
         <span id="locStatusBadge" class="loc-badge">GPS Inattivo</span>
-        <button class="gps-btn" onclick="requestGpsPermission(true)">🎯 Test GPS</button>
+        <button class="gps-btn" onclick="enableAlertsAndPermission()">🔔 Attiva Alert</button>
       </div>
     </div>
     <div id="map"></div>
@@ -239,7 +238,7 @@
 </div>
 
 <script>
-/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE (AGGIORNATE) */
+/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE */
 const OCRE_CHECKPOINTS = [
   { id: 0, name: "Terminal Collemaggio", lat: 42.3444, lng: 13.4009 },
   { id: 1, name: "Sant'Elia SS17/SS5bis", lat: 42.339161, lng: 13.40928 },
@@ -256,8 +255,7 @@ const OCRE_CHECKPOINTS = [
 const STOPS_COORDS = {
   ocre: { lat: 42.285278, lng: 13.473750, label: "San Panfilo d'Ocre (Arrivo)" },
   demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
-  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" },
-  testPoint: { lat: 42.3662767, lng: 13.4208838, label: "Punto Test GPS" }
+  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" }
 };
 
 /* ORARI */
@@ -412,9 +410,10 @@ let state = { route: "ocre", dir: "fromAQ", viewedDate: new Date() };
 const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
 const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 
-/* MAPPA & TRACCIAMENTO STRADALE */
-let map = null, depMarker = null, arrMarker = null, testMarker = null, userMarker = null, watchGpsId = null;
-let routePolyline = null, cpMarkers = [];
+/* MAPPA & TRACCIAMENTO STRADALE CON MEMORIA */
+let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
+let fullRoutePolyline = null, passedPolyline = null, cpMarkers = [];
+let osrmFullCoords = []; // Punti geodetichi completi da OSRM
 let lastPassedCPIndex = -1;
 let stopAlertTriggered = false;
 
@@ -431,12 +430,8 @@ function initMap() {
     maxZoom: 19, attribution: '&copy; OpenStreetMap'
   }).addTo(map);
 
-  testMarker = L.marker([STOPS_COORDS.testPoint.lat, STOPS_COORDS.testPoint.lng], {
-    icon: createDivIcon('pin-test', 'TEST')
-  }).bindPopup(`<b>${STOPS_COORDS.testPoint.label}</b>`).addTo(map);
-
   updateMapMarkers();
-  requestGpsPermission(false);
+  startContinuousTracking(); // Tracciamento automatico all'apertura
 }
 
 function updateMapMarkers() {
@@ -444,7 +439,8 @@ function updateMapMarkers() {
   
   cpMarkers.forEach(m => map.removeLayer(m));
   cpMarkers = [];
-  if (routePolyline) map.removeLayer(routePolyline);
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
 
   const { dep, arr } = getRouteCoords();
   document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
@@ -460,12 +456,12 @@ function updateMapMarkers() {
   if (state.route === "ocre") {
     fetchOSRMRoute();
     
-    // Mostra i checkpoint sia all'andata che al ritorno (invertendo numeri e sequenza se al ritorno)
     const cpsToShow = state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
     
     cpsToShow.forEach((cp) => {
-      if(cp.id === 0 || cp.id === 9) return; // Nascondi i terminal già coperti da dep e arr
-      const passedClass = (state.dir === "fromAQ" && cp.id <= lastPassedCPIndex) ? 'passed' : '';
+      if(cp.id === 0 || cp.id === 9) return;
+      const isPassed = (state.dir === "fromAQ" && cp.id <= lastPassedCPIndex) || (state.dir === "toAQ" && (9 - cp.id) <= lastPassedCPIndex);
+      const passedClass = isPassed ? 'passed' : '';
       const m = L.marker([cp.lat, cp.lng], {
         icon: createDivIcon(`pin-cp ${passedClass}`, cp.id)
       }).bindPopup(`<b>Checkpoint ${cp.id}:</b> ${cp.name}`).addTo(map);
@@ -485,13 +481,40 @@ async function fetchOSRMRoute() {
     const data = await res.json();
     
     if (data.routes && data.routes.length > 0) {
-      const routeCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-      if (routePolyline) map.removeLayer(routePolyline);
-      routePolyline = L.polyline(routeCoords, { color: '#e8a33d', weight: 4, opacity: 0.8 }).addTo(map);
+      osrmFullCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      redrawRoutePolylines();
     }
   } catch(e) {
     console.log("Errore OSRM Route:", e);
   }
+}
+
+function redrawRoutePolylines() {
+  if (!map || osrmFullCoords.length === 0) return;
+
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
+
+  let cutIndex = 0;
+  if (lastPassedCPIndex >= 0) {
+    const currentList = state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+    const targetCP = currentList[Math.min(lastPassedCPIndex, currentList.length - 1)];
+    
+    // Trova il punto del tracciato stradale più vicino all'ultimo checkpoint superato
+    let minD = Infinity;
+    osrmFullCoords.forEach((pt, i) => {
+      const d = getDistanceMeters(pt[0], pt[1], targetCP.lat, targetCP.lng);
+      if (d < minD) { minD = d; cutIndex = i; }
+    });
+  }
+
+  if (cutIndex > 0) {
+    const passedCoords = osrmFullCoords.slice(0, cutIndex + 1);
+    passedPolyline = L.polyline(passedCoords, { color: '#4fa88f', weight: 5, opacity: 0.9 }).addTo(map);
+  }
+
+  const remainingCoords = osrmFullCoords.slice(cutIndex);
+  fullRoutePolyline = L.polyline(remainingCoords, { color: '#e8a33d', weight: 4, opacity: 0.8 }).addTo(map);
 }
 
 function getRouteCoords() {
@@ -511,7 +534,6 @@ function fitMapBounds() {
   const points = [];
   if (depMarker) points.push(depMarker.getLatLng());
   if (arrMarker) points.push(arrMarker.getLatLng());
-  if (testMarker) points.push(testMarker.getLatLng());
   if (userMarker) points.push(userMarker.getLatLng());
   if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
 }
@@ -524,41 +546,23 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function requestGpsPermission(userTriggered = false) {
-  const badge = document.getElementById('locStatusBadge');
-  if (!navigator.geolocation) {
-    badge.textContent = "GPS assente";
-    return;
-  }
-
-  badge.textContent = "GPS in ricerca...";
+function enableAlertsAndPermission() {
   if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
   }
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      badge.textContent = "GPS Attivo";
-      badge.style.color = "var(--green)";
-      updateUserLocation(pos);
-      startContinuousTracking();
-      if (userTriggered) {
-        alert("🎯 GPS attivo!");
-      }
-    },
-    err => {
-      badge.textContent = "GPS Disattivato";
-      badge.style.color = "var(--text-dim)";
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+  alert("🔔 Alert fermata attivato con successo!\nRiceverai notifiche e vibrazione quando sei in prossimità di San Panfilo d'Ocre.");
 }
 
 function startContinuousTracking() {
+  if (!navigator.geolocation) return;
   if (watchGpsId !== null) navigator.geolocation.clearWatch(watchGpsId);
+
   watchGpsId = navigator.geolocation.watchPosition(
     updateUserLocation,
-    err => console.warn(err),
+    err => {
+      const badge = document.getElementById('locStatusBadge');
+      badge.textContent = "GPS Disattivato";
+    },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
   );
 }
@@ -578,23 +582,28 @@ function updateUserLocation(pos) {
 
   const badge = document.getElementById('locStatusBadge');
   badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
+  badge.style.color = "var(--green)";
 
-  // Controlli e alert unicamente per la tratta di ANDATA
-  if (state.route === "ocre" && state.dir === "fromAQ") {
-    OCRE_CHECKPOINTS.forEach((cp, idx) => {
+  if (state.route === "ocre") {
+    const cpsList = state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+    
+    cpsList.forEach((cp, idx) => {
       const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
-      if (dist < 180 && idx === lastPassedCPIndex + 1) {
+      if (dist < 200 && idx === lastPassedCPIndex + 1) {
         lastPassedCPIndex = idx;
         updateMapMarkers();
       }
     });
 
-    const distToArr = getDistanceMeters(lat, lng, STOPS_COORDS.ocre.lat, STOPS_COORDS.ocre.lng);
-    const isMovingFast = speed > 12;
-    const passedKeyCheckpoints = lastPassedCPIndex >= 4;
+    // Alert solo all'andata verso San Panfilo
+    if (state.dir === "fromAQ") {
+      const distToArr = getDistanceMeters(lat, lng, STOPS_COORDS.ocre.lat, STOPS_COORDS.ocre.lng);
+      const isMovingFast = speed > 12;
+      const passedKeyCheckpoints = lastPassedCPIndex >= 4;
 
-    if ((isMovingFast || passedKeyCheckpoints) && distToArr < 450 && !stopAlertTriggered) {
-      triggerStopNotification();
+      if ((isMovingFast || passedKeyCheckpoints) && distToArr < 450 && !stopAlertTriggered) {
+        triggerStopNotification();
+      }
     }
   }
 }
