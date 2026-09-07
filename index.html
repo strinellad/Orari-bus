@@ -610,5 +610,11 @@ document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.o
 setInterval(renderClockAndChip, 30000);
 renderAll(); loadOverride(); initMap();
 </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+
 </body>
 </html>
