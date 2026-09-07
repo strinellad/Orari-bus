@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Orari Bus · San Demetrio / San Panfilo ⇄ L'Aquila</title>
 
-<!-- Meta Tag per PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#12181f">
@@ -143,7 +142,6 @@
   .next-sub{ margin-top: 8px; font-size: 13px; color: var(--text-dim); }
   .next-when{ margin-top: 10px; font-size: 13px; color: var(--amber); font-weight: 600; }
 
-  /* Mappa Card */
   .map-card{
     background: var(--surface);
     border: 1px solid var(--border);
@@ -252,21 +250,6 @@
 </div>
 
 <script>
-/* CACHE OFFLINE (Service Worker) */
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE_NAME = 'bus-schedule-v2';
-    self.addEventListener('install', e => {
-      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./'])));
-    });
-    self.addEventListener('fetch', e => {
-      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-    });
-  `;
-  const blob = new Blob([swCode], {type: 'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-}
-
 /* COORDINATE FERMATE */
 const STOPS_COORDS = {
   ocre: { lat: 42.2852820, lng: 13.4737461, label: "San Panfilo d'Ocre (Piazza)" },
@@ -428,4 +411,203 @@ const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","d
 
 let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
 
-f
+function getRouteCoords() {
+  let dep, arr;
+  if (state.route === "ocre") {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.ocre : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.ocre;
+  } else {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.demetrio : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.demetrio;
+  }
+  return { dep, arr };
+}
+
+function createDivIcon(className, text) {
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+
+  updateMapMarkers();
+  requestGpsPermission(false);
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+  const { dep, arr } = getRouteCoords();
+  document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
+
+  if (depMarker) depMarker.setLatLng([dep.lat, dep.lng]);
+  else depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
+
+  if (arrMarker) arrMarker.setLatLng([arr.lat, arr.lng]);
+  else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
+
+  fitMapBounds();
+}
+
+function fitMapBounds() {
+  if (!map) return;
+  const points = [];
+  if (depMarker) points.push(depMarker.getLatLng());
+  if (arrMarker) points.push(arrMarker.getLatLng());
+  if (userMarker) points.push(userMarker.getLatLng());
+  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
+}
+
+function requestGpsPermission(userTriggered = false) {
+  const badge = document.getElementById('locStatusBadge');
+  if (!navigator.geolocation) {
+    badge.textContent = "GPS assente";
+    return;
+  }
+
+  badge.textContent = "Ricerca GPS...";
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      badge.textContent = "GPS Attivo";
+      badge.style.color = "var(--green)";
+      updateUserLocation(pos);
+      startContinuousTracking();
+      if (userTriggered) map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+    },
+    err => {
+      badge.textContent = "Servono permessi GPS";
+      badge.style.color = "var(--danger)";
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function startContinuousTracking() {
+  if (watchGpsId !== null) navigator.geolocation.clearWatch(watchGpsId);
+  watchGpsId = navigator.geolocation.watchPosition(
+    updateUserLocation,
+    err => console.warn(err),
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+  );
+}
+
+function updateUserLocation(pos) {
+  const userCoords = [pos.coords.latitude, pos.coords.longitude];
+  if (userMarker) userMarker.setLatLng(userCoords);
+  else {
+    userMarker = L.marker(userCoords, {
+      icon: L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-user"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] })
+    }).addTo(map);
+    fitMapBounds();
+  }
+}
+
+function renderTabs(){
+  const routeTabs = document.getElementById("routeTabs"); routeTabs.innerHTML = "";
+  Object.entries(ROUTES).forEach(([key,r])=>{
+    const el = document.createElement("div");
+    el.className = "tab" + (state.route===key ? " active":""); el.textContent = r.label;
+    el.onclick = ()=>{ state.route=key; state.dir="toAQ"; renderAll(); updateMapMarkers(); };
+    routeTabs.appendChild(el);
+  });
+
+  const dirTabs = document.getElementById("dirTabs"); dirTabs.innerHTML = "";
+  Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
+    const el = document.createElement("div");
+    el.className = "dirbtn" + (state.dir===key ? " active":""); el.textContent = d.label;
+    el.onclick = ()=>{ state.dir=key; renderAll(); updateMapMarkers(); };
+    dirTabs.appendChild(el);
+  });
+}
+
+function renderClockAndChip(){
+  const now = new Date();
+  document.getElementById("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const info = getDayInfo(state.viewedDate);
+  const chip = document.getElementById("daychip");
+  chip.className = "daychip " + (info.isHoliday ? "festivo" : (info.isScolastico ? "scolastico" : "nonscolastico"));
+  document.getElementById("daychipText").innerHTML = `<b>${(dateStr(state.viewedDate)===dateStr(now)?"oggi, ":"")+WD[info.dow]} ${state.viewedDate.getDate()}</b> — ` + (info.isHoliday?"festivo":(info.isScolastico?"scolastico":"feriale, no scuola"));
+}
+
+function tripsSorted(trips){ return [...trips].sort((a,b)=> toMinutes(a.p)-toMinutes(b.p)); }
+
+function findNextDeparture(){
+  const trips = tripsSorted(ROUTES[state.route].directions[state.dir].trips);
+  const now = new Date();
+  for(let d=0; d<14; d++){
+    const date = addDays(now, d); const info = getDayInfo(date);
+    if(info.isHoliday) continue;
+    for(const trip of trips){
+      if(!tripVisible(trip, info)) continue;
+      const dep = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ...trip.p.split(":").map(Number));
+      if(d===0 && dep<=now) continue;
+      return {trip, date, dep};
+    }
+  }
+  return null;
+}
+
+function renderNextCard(){
+  const card = document.getElementById("nextCard");
+  const found = findNextDeparture();
+  if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa nei prossimi 14 giorni.</div>`; return; }
+  const {trip, date, dep} = found; const now = new Date();
+  const diffMin = Math.round((dep-now)/60000);
+  const when = dateStr(date)===dateStr(now) ? (diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`) : `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  card.innerHTML = `
+    <div class="next-label">Prossima corsa</div>
+    <div class="next-main">
+      <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+    </div>
+    <div class="next-sub">linea ${trip.nome}</div>
+    <div class="next-when">${when}</div>
+  `;
+}
+
+function renderTripList(){
+  const container = document.getElementById("tripList"); container.innerHTML = "";
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const trips = tripsSorted(dirInfo.trips);
+  const info = getDayInfo(state.viewedDate);
+
+  if(info.isHoliday){ container.innerHTML = `<div style="padding:10px; color:var(--text-dim);">Nessuna corsa nei giorni festivi.</div>`; return; }
+
+  const now = new Date();
+  trips.forEach(trip => {
+    if(!tripVisible(trip, info)) return;
+    const isPassed = dateStr(state.viewedDate)===dateStr(now) && toMinutes(trip.p) < (now.getHours()*60+now.getMinutes());
+    const el = document.createElement("div");
+    el.className = "trip" + (isPassed ? " passed" : "");
+    el.innerHTML = `
+      <div class="roundel-sm" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
+      <div class="trip-meta"><div style="font-size:13px; font-weight:600;">${trip.nome}</div></div>
+      <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function renderAll(){
+  renderTabs(); renderClockAndChip(); renderNextCard(); renderTripList();
+  document.getElementById("dateLabel").textContent = dateStr(state.viewedDate)===dateStr(new Date()) ? "oggi" : `${state.viewedDate.getDate()} ${MO[state.viewedDate.getMonth()]}`;
+}
+
+document.getElementById("prevDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, -1); renderAll(); };
+document.getElementById("nextDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, 1); renderAll(); };
+document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.onclick = ()=> setOverride(el.dataset.v); });
+
+setInterval(renderClockAndChip, 30000);
+renderAll(); loadOverride(); initMap();
+</script>
+</body>
+</html>
