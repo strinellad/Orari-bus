@@ -247,7 +247,7 @@ const OCRE_CHECKPOINTS = [
   { id: 3, name: "CP3", lat: 42.305916, lng: 13.453780 },
   { id: 4, name: "CP4", lat: 42.300466, lng: 13.453139 },
   { id: 5, name: "SR 5 bis Vestina", lat: 42.295833, lng: 13.453444 },
-  { id: 6, name: "San Felice - Via Libertà 12", lat: 42.288540, lng: 13.468110 },
+  { id: 6, name: "San Felice", lat: 42.293446, lng: 13.453799 },
   { id: 7, name: "CP7", lat: 42.291561, lng: 13.458896 },
   { id: 8, name: "San Panfilo - Via Silone", lat: 42.2866969, lng: 13.47107 },
   { id: 9, name: "San Panfilo d'Ocre Arrivo", lat: 42.285278, lng: 13.473750 }
@@ -457,14 +457,18 @@ function updateMapMarkers() {
   else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
   arrMarker.bindPopup(`<b>Arrivo:</b><br>${arr.label}`);
 
-  if (state.route === "ocre" && state.dir === "fromAQ") {
+  if (state.route === "ocre") {
     fetchOSRMRoute();
-    OCRE_CHECKPOINTS.forEach((cp, idx) => {
-      if(idx === 0 || idx === OCRE_CHECKPOINTS.length - 1) return;
-      const passedClass = idx <= lastPassedCPIndex ? 'passed' : '';
+    
+    // Mostra i checkpoint sia all'andata che al ritorno (invertendo numeri e sequenza se al ritorno)
+    const cpsToShow = state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+    
+    cpsToShow.forEach((cp) => {
+      if(cp.id === 0 || cp.id === 9) return; // Nascondi i terminal già coperti da dep e arr
+      const passedClass = (state.dir === "fromAQ" && cp.id <= lastPassedCPIndex) ? 'passed' : '';
       const m = L.marker([cp.lat, cp.lng], {
-        icon: createDivIcon(`pin-cp ${passedClass}`, idx)
-      }).bindPopup(`<b>Checkpoint ${idx}:</b> ${cp.name}`).addTo(map);
+        icon: createDivIcon(`pin-cp ${passedClass}`, cp.id)
+      }).bindPopup(`<b>Checkpoint ${cp.id}:</b> ${cp.name}`).addTo(map);
       cpMarkers.push(m);
     });
   }
@@ -474,7 +478,8 @@ function updateMapMarkers() {
 
 async function fetchOSRMRoute() {
   try {
-    const coordsStr = OCRE_CHECKPOINTS.map(cp => `${cp.lng},${cp.lat}`).join(';');
+    const cps = state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+    const coordsStr = cps.map(cp => `${cp.lng},${cp.lat}`).join(';');
     const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
     const res = await fetch(url);
     const data = await res.json();
@@ -538,7 +543,7 @@ function requestGpsPermission(userTriggered = false) {
       updateUserLocation(pos);
       startContinuousTracking();
       if (userTriggered) {
-        alert("🎯 GPS attivo! Notifica e vibrazione attive per la fermata.");
+        alert("🎯 GPS attivo!");
       }
     },
     err => {
@@ -574,6 +579,7 @@ function updateUserLocation(pos) {
   const badge = document.getElementById('locStatusBadge');
   badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
 
+  // Controlli e alert unicamente per la tratta di ANDATA
   if (state.route === "ocre" && state.dir === "fromAQ") {
     OCRE_CHECKPOINTS.forEach((cp, idx) => {
       const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
