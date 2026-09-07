@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Orari Bus · San Demetrio / San Panfilo ⇄ L'Aquila</title>
+
+<!-- Meta Tag per PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#12181f">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root{
+    --bg: #12181f;
+    --surface: #1b232c;
+    --surface-2: #232d38;
+    --border: #2e3945;
+    --text: #edeae1;
+    --text-dim: #8a93a0;
+    --amber: #e8a33d;
+    --amber-soft: rgba(232,163,61,0.14);
+    --green: #4fa88f;
+    --green-soft: rgba(79,168,143,0.14);
+    --danger: #c4634f;
+    --danger-soft: rgba(196,99,79,0.14);
+
+    --line-2001: #6b8f71;
+    --line-2005: #8b6fb0;
+    --line-2008: #c46b7a;
+    --line-2046: #5c8fbf;
+    --line-2059: #b08040;
+    --line-2064: #4fa88f;
+    --line-2007: #7c93a8;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  header{ margin-bottom: 18px; }
+  .eyebrow-row{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom: 6px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .clock{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .daychip{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height:1.3;
+  }
+  .daychip b{ color: var(--text); font-weight:600; }
+  .daychip.scolastico{ background: var(--green-soft); border-color: rgba(79,168,143,0.35); }
+  .daychip.scolastico .dot{ background: var(--green); }
+  .daychip.nonscolastico{ background: var(--amber-soft); border-color: rgba(232,163,61,0.35); }
+  .daychip.nonscolastico .dot{ background: var(--amber); }
+  .daychip.festivo{ background: var(--danger-soft); border-color: rgba(196,99,79,0.35); }
+  .daychip.festivo .dot{ background: var(--danger); }
+  .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+
+  .calbar{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top: 8px; }
+  .calbar-label{ font-size: 11.5px; color: var(--text-dim); margin-right: 2px; }
+  .calopt{
+    font-size: 11.5px; padding: 5px 9px; border-radius: 7px;
+    border: 1px solid var(--border); color: var(--text-dim);
+    cursor:pointer; user-select:none; -webkit-tap-highlight-color: transparent;
+  }
+  .calopt.active{ background: var(--amber); color: #1b1305; border-color: var(--amber); font-weight: 600; }
+
+  .tabbar{ display:flex; gap:8px; margin: 18px 0 10px; }
+  .tab{
+    flex:1; text-align:center; padding: 11px 8px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-dim); font-size: 14px; font-weight: 600;
+    cursor:pointer; user-select:none;
+  }
+  .tab.active{ background: var(--surface-2); color: var(--text); border-color: var(--amber); }
+
+  .dirbar{
+    display:flex; gap:6px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 4px; margin-bottom: 18px;
+  }
+  .dirbtn{
+    flex:1; text-align:center; padding: 9px 6px; border-radius: 9px;
+    font-size: 13px; font-weight: 500; color: var(--text-dim);
+    cursor:pointer; user-select:none;
+  }
+  .dirbtn.active{ background: var(--amber); color: #1b1305; font-weight: 600; }
+
+  .next-card{
+    border-radius: 16px; padding: 18px 18px 16px;
+    background: linear-gradient(155deg, var(--surface-2), var(--surface));
+    border: 1px solid rgba(232,163,61,0.4);
+    margin-bottom: 22px; position: relative; overflow:hidden;
+  }
+  .next-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background: var(--amber); opacity:.8; }
+  .next-label{ font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 10px; }
+  .next-main{ display:flex; align-items:center; gap:12px; }
+  .roundel{
+    flex:none; width: 42px; height:42px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216;
+  }
+  .next-times{ font-family:'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; line-height:1.1; }
+  .next-times small{ font-size: 14px; color: var(--text-dim); font-weight: 500; }
+  .next-sub{ margin-top: 8px; font-size: 13px; color: var(--text-dim); }
+  .next-when{ margin-top: 10px; font-size: 13px; color: var(--amber); font-weight: 600; }
+
+  /* Mappa Card */
+  .map-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 22px;
+  }
+  .map-header{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px; }
+  .map-title{ font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-actions{ display: flex; align-items: center; gap: 6px; }
+  .loc-badge{ font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--text-dim); }
+  .gps-btn {
+    background: var(--amber-soft); border: 1px solid rgba(232,163,61,0.4);
+    color: var(--amber); padding: 4px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; cursor: pointer; user-select: none;
+  }
+
+  #map{ height: 260px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #12181f; }
+
+  .custom-div-icon { background: none; border: none; }
+  .map-pin {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+    color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff;
+  }
+  .pin-dep { background: var(--amber); }
+  .pin-arr { background: var(--green); color: #fff; }
+  .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
+
+  .datebar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+  .datebar .datebtns{ display:flex; align-items:center; gap:4px; }
+  .stepbtn{ width: 32px; height:32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 16px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .dateLabel{ font-size: 13px; color: var(--text-dim); min-width: 118px; text-align:center; }
+
+  .listtitle{ font-family:'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; margin: 4px 0 10px; }
+  .trip{ display:flex; align-items:center; gap:12px; padding: 12px 4px; border-bottom: 1px solid var(--border); }
+  .trip.passed{ opacity: 0.38; }
+  .roundel-sm{ flex:none; width: 34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 10.5px; color:#0e1216; }
+  .trip-times{ font-family:'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; white-space:nowrap; }
+  .trip-times .arrow{ color: var(--text-dim); font-weight:400; margin:0 4px; }
+  .trip-meta{ flex:1; min-width:0; }
+  .badge{ flex:none; font-size: 11px; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--border); color: var(--text-dim); }
+  .badge.fa{ color: var(--green); border-color: rgba(79,168,143,0.35); }
+  .badge.fs{ color: var(--amber); border-color: rgba(232,163,61,0.35); }
+  .badge.fns{ color: #b0a3d6; border-color: rgba(139,111,176,0.35); }
+
+  details.info{ margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  details.info summary{ font-size: 13px; font-weight: 600; cursor:pointer; color: var(--text); }
+  .info-body{ margin-top: 10px; font-size: 12.5px; color: var(--text-dim); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow-row">
+      <h1>Orari bus</h1>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+    <div id="daychip" class="daychip"><span class="dot"></span><span id="daychipText">—</span></div>
+    <div class="calbar" id="calBar">
+      <span class="calbar-label">Calendario non corretto?</span>
+      <div class="calopt" data-v="auto">Auto</div>
+      <div class="calopt" data-v="si">Scolastico</div>
+      <div class="calopt" data-v="no">Non scol.</div>
+    </div>
+  </header>
+
+  <div class="tabbar" id="routeTabs"></div>
+  <div class="dirbar" id="dirTabs"></div>
+
+  <div class="next-card" id="nextCard"></div>
+
+  <div class="map-card">
+    <div class="map-header">
+      <span id="mapTitle" class="map-title">🗺️ Percorso</span>
+      <div class="map-actions">
+        <span id="locStatusBadge" class="loc-badge">GPS inattivo</span>
+        <button class="gps-btn" onclick="requestGpsPermission(true)">🎯 Mia Posizione</button>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="datebar">
+    <div class="listtitle">Corse</div>
+    <div class="datebtns">
+      <div class="stepbtn" id="prevDay">‹</div>
+      <div class="dateLabel" id="dateLabel">oggi</div>
+      <div class="stepbtn" id="nextDay">›</div>
+    </div>
+  </div>
+
+  <div id="tripList"></div>
+
+  <details class="info">
+    <summary>Cosa significano le sigle FA · FS · FNS?</summary>
+    <div class="info-body">
+      <p><b style="color:var(--green)">FA</b> — Feriale Annuale</p>
+      <p><b style="color:var(--amber)">FS</b> — Feriale Scolastico</p>
+      <p><b style="color:#b0a3d6">FNS</b> — Feriale Non Scolastico</p>
+    </div>
+  </details>
+
+</div>
+
+<script>
+/* CACHE OFFLINE (Service Worker) */
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'bus-schedule-v2';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./'])));
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+}
+
+/* COORDINATE FERMATE */
+const STOPS_COORDS = {
+  ocre: { lat: 42.2852820, lng: 13.4737461, label: "San Panfilo d'Ocre (Piazza)" },
+  demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
+  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Bus Collemaggio" }
+};
+
+/* ORARI */
+const demetrioToAQ = [
+  {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
+  {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
+  {p:"13:35", a:"14:00", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"13:25", a:"13:50", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"9:58",  a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"9:45",  a:"10:10", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"8:40",  a:"9:00",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"8:30",  a:"8:55",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"7:33",  a:"7:55",  linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina"},
+  {p:"7:25",  a:"7:50",  linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"7:11",  a:"7:39",  linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
+  {p:"7:11",  a:"7:40",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"7:09",  a:"7:50",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+];
+
+const demetrioFromAQ = [
+  {p:"7:50",  a:"8:28",  linea:"2001", tipo:"FNS", nome:"Bominaco"},
+  {p:"8:00",  a:"8:25",  linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"8:00",  a:"8:17",  linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
+  {p:"8:00",  a:"8:25",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"8:00",  a:"8:40",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"10:15", a:"10:38", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"11:40", a:"12:09", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"12:10", a:"12:27", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"12:20", a:"13:02", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"13:40", a:"14:20", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"13:40", a:"14:20", linea:"2064", tipo:"FNS", nome:"San Demetrio-Tussillo"},
+  {p:"14:05", a:"14:28", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina"},
+  {p:"14:10", a:"14:48", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"16:40", a:"17:05", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"17:00", a:"17:21", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"19:00", a:"19:23", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"19:15", a:"19:55", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
+];
+
+const ocreFromAQ = [
+  {p:"06:00", a:"06:21", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"06:45", a:"07:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:10", a:"08:31", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"solo sab", giorno:d=>d===6},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"lun–ven", giorno:d=>d>=1&&d<=5},
+  {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+];
+
+const ocreToAQ = [
+  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"martedì", giorno:d=>d===2},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"tranne mar", giorno:d=>d!==2},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+];
+
+const ROUTES = {
+  demetrio: {
+    label: "San Demetrio",
+    directions: {
+      toAQ:   { label: "San Demetrio → L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ },
+      fromAQ: { label: "L'Aquila → San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+    }
+  },
+  ocre: {
+    label: "San Panfilo d'Ocre",
+    directions: {
+      toAQ:   { label: "San Panfilo → L'Aquila", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ },
+      fromAQ: { label: "L'Aquila → San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
+    }
+  }
+};
+
+const LINE_COLORS = {
+  "2001": "var(--line-2001)", "2005": "var(--line-2005)", "2008": "var(--line-2008)",
+  "2046": "var(--line-2046)", "2059": "var(--line-2059)", "2064": "var(--line-2064)", "2007": "var(--line-2007)"
+};
+
+const SCHOOL_YEAR = { start: "2026-09-16", end: "2027-06-09" };
+const SCHOOL_BREAKS = [["2026-12-07","2026-12-07"], ["2026-12-23","2027-01-06"], ["2027-03-25","2027-03-30"]];
+const HOLIDAYS = ["2026-10-04","2026-11-01","2026-12-08","2026-12-25","2026-12-26","2027-01-01","2027-01-06","2027-03-28","2027-03-29","2027-04-25","2027-05-01","2027-06-02"];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function dateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
+
+let scolasticoOverride = null;
+
+function getDayInfo(date){
+  const ds = dateStr(date);
+  const dow = date.getDay();
+  const isHoliday = dow===0 || HOLIDAYS.includes(ds);
+  let isScolastico = false;
+  if(!isHoliday){
+    if(scolasticoOverride !== null) isScolastico = scolasticoOverride;
+    else {
+      const inYear = ds>=SCHOOL_YEAR.start && ds<=SCHOOL_YEAR.end;
+      const inBreak = SCHOOL_BREAKS.some(([s,e])=> ds>=s && ds<=e);
+      isScolastico = inYear && !inBreak;
+    }
+  }
+  return {ds, dow, isHoliday, isScolastico};
+}
+
+function loadOverride(){
+  try {
+    const r = localStorage.getItem('scolastico-override');
+    if(r) scolasticoOverride = r==="si" ? true : (r==="no" ? false : null);
+  } catch(e){}
+  renderCalBar(); renderAll();
+}
+
+function setOverride(v){
+  scolasticoOverride = v==="si" ? true : (v==="no" ? false : null);
+  renderCalBar(); renderAll();
+  try { localStorage.setItem('scolastico-override', v); } catch(e){}
+}
+
+function renderCalBar(){
+  const bar = document.getElementById("calBar");
+  const cur = scolasticoOverride===true ? "si" : (scolasticoOverride===false ? "no" : "auto");
+  bar.querySelectorAll(".calopt").forEach(el=>{ el.classList.toggle("active", el.dataset.v===cur); });
+}
+
+function tripVisible(trip, dayInfo){
+  if(dayInfo.isHoliday) return false;
+  let base = trip.tipo==="FA" ? true : (trip.tipo==="FS" ? dayInfo.isScolastico : !dayInfo.isScolastico);
+  if(!base) return false;
+  return trip.giorno ? trip.giorno(dayInfo.dow) : true;
+}
+
+let state = { route: "demetrio", dir: "toAQ", viewedDate: new Date() };
+const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+
+let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
+
+f
