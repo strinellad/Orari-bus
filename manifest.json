@@ -1,8 +1,9 @@
 {
   "name": "Orari Bus",
   "short_name": "Orari Bus",
-  "description": "Orari autobus San Demetrio e San Panfilo - L'Aquila",
-  "start_url": "./",
+  "description": "Orari autobus San Demetrio e San Panfilo L Aquila",
+  "start_url": "/Orari-bus/",
+  "scope": "/Orari-bus/",
   "display": "standalone",
   "background_color": "#12181f",
   "theme_color": "#12181f",
