@@ -57,7 +57,7 @@
     padding: 20px 16px 40px;
   }
 
-  header{ margin-bottom: 18px; }
+  header{ margin-bottom: 14px; }
   .eyebrow-row{
     display:flex; align-items:baseline; justify-content:space-between;
     margin-bottom: 6px;
@@ -75,6 +75,19 @@
     color: var(--text-dim);
     font-variant-numeric: tabular-nums;
   }
+
+  /* RSS Banner */
+  .rss-banner {
+    background: rgba(232,163,61,0.1);
+    border: 1px solid var(--amber);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .rss-title { font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: 2px; }
+  .rss-body { font-size: 12px; color: var(--text); line-height: 1.4; }
+
   .daychip{
     display:inline-flex; align-items:center; gap:7px;
     font-size: 13px;
@@ -99,7 +112,7 @@
   .calopt{
     font-size: 11.5px; padding: 5px 9px; border-radius: 7px;
     border: 1px solid var(--border); color: var(--text-dim);
-    cursor:pointer; user-select:none; -webkit-tap-highlight-color: transparent;
+    cursor:pointer; user-select:none;
   }
   .calopt.active{ background: var(--amber); color: #1b1305; border-color: var(--amber); font-weight: 600; }
 
@@ -138,8 +151,7 @@
     display:flex; align-items:center; justify-content:center;
     font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216;
   }
-  .next-times{ font-family:'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; line-height:1.1; }
-  .next-times small{ font-size: 14px; color: var(--text-dim); font-weight: 500; }
+  .next-times{ font-family:'IBM Plex Mono', monospace; font-size: 24px; font-weight: 600; line-height:1.1; }
   .next-sub{ margin-top: 8px; font-size: 13px; color: var(--text-dim); }
   .next-when{ margin-top: 10px; font-size: 13px; color: var(--amber); font-weight: 600; }
 
@@ -166,11 +178,12 @@
   .map-pin {
     width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px;
     color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff;
   }
   .pin-dep { background: var(--amber); }
   .pin-arr { background: var(--green); color: #fff; }
+  .pin-test { background: #e11d48; color: #fff; }
   .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
 
   .leaflet-popup-content-wrapper { background: var(--surface-2); color: var(--text); border-radius: 8px; border: 1px solid var(--border); }
@@ -182,16 +195,31 @@
   .dateLabel{ font-size: 13px; color: var(--text-dim); min-width: 118px; text-align:center; }
 
   .listtitle{ font-family:'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; margin: 4px 0 10px; }
-  .trip{ display:flex; align-items:center; gap:12px; padding: 12px 4px; border-bottom: 1px solid var(--border); }
-  .trip.passed{ opacity: 0.38; }
-  .roundel-sm{ flex:none; width: 34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 10.5px; color:#0e1216; }
-  .trip-times{ font-family:'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; white-space:nowrap; }
-  .trip-times .arrow{ color: var(--text-dim); font-weight:400; margin:0 4px; }
-  .trip-meta{ flex:1; min-width:0; }
-  .badge{ flex:none; font-size: 11px; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--border); color: var(--text-dim); }
-  .badge.fa{ color: var(--green); border-color: rgba(79,168,143,0.35); }
-  .badge.fs{ color: var(--amber); border-color: rgba(232,163,61,0.35); }
-  .badge.fns{ color: #b0a3d6; border-color: rgba(139,111,176,0.35); }
+  
+  /* Nuova struttura corsa chiara e pulita */
+  .trip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .trip-card.passed { opacity: 0.4; }
+  .trip-main-info { display: flex; align-items: center; gap: 12px; }
+  .trip-times-col { display: flex; flex-direction: column; gap: 2px; }
+  .time-dep { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: var(--text); }
+  .time-arr { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); }
+  .trip-dest { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .trip-line-name { font-size: 11px; color: var(--text-dim); }
+  
+  .badge{ font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
+  .badge.fa{ color: var(--green); border-color: rgba(79,168,143,0.35); background: var(--green-soft); }
+  .badge.fs{ color: var(--amber); border-color: rgba(232,163,61,0.35); background: var(--amber-soft); }
+  .badge.fns{ color: #b0a3d6; border-color: rgba(139,111,176,0.35); background: rgba(139,111,176,0.14); }
 
   details.info{ margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
   details.info summary{ font-size: 13px; font-weight: 600; cursor:pointer; color: var(--text); }
@@ -203,17 +231,23 @@
 
   <header>
     <div class="eyebrow-row">
-      <h1>Orari bus</h1>
+      <h1>Orari bus TUA</h1>
       <div class="clock" id="clock">--:--</div>
     </div>
     <div id="daychip" class="daychip"><span class="dot"></span><span id="daychipText">—</span></div>
     <div class="calbar" id="calBar">
-      <span class="calbar-label">Calendario non corretto?</span>
+      <span class="calbar-label">Forza calendario:</span>
       <div class="calopt" data-v="auto">Auto</div>
       <div class="calopt" data-v="si">Scolastico</div>
       <div class="calopt" data-v="no">Non scol.</div>
     </div>
   </header>
+
+  <!-- Banner Avvisi RSS -->
+  <div id="rssBanner" class="rss-banner">
+    <div class="rss-title">📢 AVVISO TUA ABRUZZO</div>
+    <div id="rssText" class="rss-body"></div>
+  </div>
 
   <div class="tabbar" id="routeTabs"></div>
   <div class="dirbar" id="dirTabs"></div>
@@ -222,17 +256,17 @@
 
   <div class="map-card">
     <div class="map-header">
-      <span id="mapTitle" class="map-title">🗺️ Percorso</span>
+      <span id="mapTitle" class="map-title">🗺️ Mappa Percorso</span>
       <div class="map-actions">
-        <span id="locStatusBadge" class="loc-badge">GPS inattivo</span>
-        <button class="gps-btn" onclick="requestGpsPermission(true)">🎯 Mia Posizione</button>
+        <span id="locStatusBadge" class="loc-badge">GPS Inattivo</span>
+        <button class="gps-btn" onclick="requestGpsPermission(true)">🔔 Test GPS (Via Vasche)</button>
       </div>
     </div>
     <div id="map"></div>
   </div>
 
   <div class="datebar">
-    <div class="listtitle">Corse</div>
+    <div class="listtitle">Tutte le corse del giorno</div>
     <div class="datebtns">
       <div class="stepbtn" id="prevDay">‹</div>
       <div class="dateLabel" id="dateLabel">oggi</div>
@@ -243,51 +277,32 @@
   <div id="tripList"></div>
 
   <details class="info">
-    <summary>Cosa significano le sigle FA · FS · FNS?</summary>
+    <summary>Legenda delle sigle (FA · FS · FNS)</summary>
     <div class="info-body">
-      <p><b style="color:var(--green)">FA</b> — Feriale Annuale</p>
-      <p><b style="color:var(--amber)">FS</b> — Feriale Scolastico</p>
-      <p><b style="color:#b0a3d6">FNS</b> — Feriale Non Scolastico</p>
+      <p><b style="color:var(--green)">FA (Feriale Annuale)</b> — Corsa attiva dal lunedì al sabato tutto l'anno.</p>
+      <p><b style="color:var(--amber)">FS (Feriale Scolastico)</b> — Corsa attiva solo quando le scuole sono aperte.</p>
+      <p><b style="color:#b0a3d6">FNS (Feriale Non Scolastico)</b> — Corsa attiva nei periodi di vacanza scolastica.</p>
     </div>
   </details>
 
 </div>
 
 <script>
-/* COORDINATE ESATTE FERMATE */
+/* COORDINATE FERMATE + PUNTO TEST VIA VASCHE DEL VENTO 55 */
 const STOPS_COORDS = {
   ocre: { lat: 42.2882, lng: 13.4830, label: "San Panfilo d'Ocre (Piazza)" },
   demetrio: { lat: 42.28912, lng: 13.55568, label: "San Demetrio Uff. Postale" },
-  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Bus Collemaggio" }
+  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" },
+  testVasche: { lat: 42.3635, lng: 13.3582, label: "TEST: Via Vasche del Vento 55" }
 };
 
-/* ORARI PDF TUA */
-const demetrioToAQ = [
-  {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
-  {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
-  {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
-  {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
-  {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
-  {p:"13:35", a:"14:00", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
-  {p:"13:25", a:"13:50", linea:"2001", tipo:"FS", nome:"Bominaco"},
-  {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Bominaco"},
-  {p:"9:58",  a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
-  {p:"9:45",  a:"10:10", linea:"2001", tipo:"FA", nome:"Bominaco"},
-  {p:"8:40",  a:"9:00",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
-  {p:"8:30",  a:"8:55",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
-  {p:"7:33",  a:"7:55",  linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina"},
-  {p:"7:25",  a:"7:50",  linea:"2001", tipo:"FA", nome:"Bominaco"},
-  {p:"7:11",  a:"7:39",  linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
-  {p:"7:11",  a:"7:40",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
-  {p:"7:09",  a:"7:50",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
-];
-
+/* ORARI */
 const demetrioFromAQ = [
-  {p:"7:50",  a:"8:28",  linea:"2001", tipo:"FNS", nome:"Bominaco"},
-  {p:"8:00",  a:"8:25",  linea:"2001", tipo:"FS", nome:"Bominaco"},
-  {p:"8:00",  a:"8:17",  linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
-  {p:"8:00",  a:"8:25",  linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
-  {p:"8:00",  a:"8:40",  linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"07:50", a:"08:28", linea:"2001", tipo:"FNS", nome:"Bominaco"},
+  {p:"08:00", a:"08:25", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"08:00", a:"08:17", linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
+  {p:"08:00", a:"08:25", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"08:00", a:"08:40", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
   {p:"10:15", a:"10:38", linea:"2001", tipo:"FS", nome:"Bominaco"},
   {p:"11:40", a:"12:09", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
   {p:"12:10", a:"12:27", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
@@ -299,7 +314,27 @@ const demetrioFromAQ = [
   {p:"16:40", a:"17:05", linea:"2001", tipo:"FA", nome:"Bominaco"},
   {p:"17:00", a:"17:21", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"19:00", a:"19:23", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
-  {p:"19:15", a:"19:55", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
+  {p:"19:15", a:"19:55", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"}
+];
+
+const demetrioToAQ = [
+  {p:"07:09", a:"07:50", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"07:11", a:"07:39", linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
+  {p:"07:11", a:"07:40", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"07:25", a:"07:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"07:33", a:"07:55", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina"},
+  {p:"08:30", a:"08:55", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"08:40", a:"09:00", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo"},
+  {p:"09:45", a:"10:10", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"09:58", a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"13:25", a:"13:50", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"13:35", a:"14:00", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
+  {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
+  {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"}
 ];
 
 const ocreFromAQ = [
@@ -314,38 +349,38 @@ const ocreFromAQ = [
   {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
   {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
   {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
 ];
 
 const ocreToAQ = [
-  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"martedì", giorno:d=>d===2},
-  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"tranne mar", giorno:d=>d!==2},
-  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
   {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
   {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"tranne mar", giorno:d=>d!==2},
+  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"martedì", giorno:d=>d===2},
+  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
 ];
 
 const ROUTES = {
   demetrio: {
     label: "San Demetrio",
     directions: {
-      fromAQ: { label: "L'Aquila ➔ San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
-      toAQ:   { label: "San Demetrio ➔ L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ }
+      fromAQ: { label: "1. DA L'AQUILA ➔", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+      toAQ:   { label: "2. PER L'AQUILA ➔", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ }
     }
   },
   ocre: {
     label: "San Panfilo d'Ocre",
     directions: {
-      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
-      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
+      fromAQ: { label: "1. DA L'AQUILA ➔", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Piazza", trips: ocreFromAQ },
+      toAQ:   { label: "2. PER L'AQUILA ➔", depStop:"San Panfilo d'Ocre Piazza", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
     }
   }
 };
@@ -413,7 +448,8 @@ let state = { route: "demetrio", dir: "fromAQ", viewedDate: new Date() };
 const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
 const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 
-let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
+let map = null, depMarker = null, arrMarker = null, testMarker = null, userMarker = null, watchGpsId = null;
+let alertTriggered = false;
 
 function getRouteCoords() {
   let dep, arr;
@@ -441,6 +477,11 @@ function initMap() {
     attribution: '&copy; OpenStreetMap'
   }).addTo(map);
 
+  // Aggiungi marker del punto di Test
+  testMarker = L.marker([STOPS_COORDS.testVasche.lat, STOPS_COORDS.testVasche.lng], {
+    icon: createDivIcon('pin-test', 'TEST')
+  }).bindPopup(`<b>${STOPS_COORDS.testVasche.label}</b>`).addTo(map);
+
   updateMapMarkers();
   requestGpsPermission(false);
 }
@@ -455,8 +496,7 @@ function updateMapMarkers() {
     depMarker.setPopupContent(`<b>Partenza:</b><br>${dep.label}`);
   } else {
     depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') })
-      .bindPopup(`<b>Partenza:</b><br>${dep.label}`)
-      .addTo(map);
+      .bindPopup(`<b>Partenza:</b><br>${dep.label}`).addTo(map);
   }
 
   if (arrMarker) {
@@ -464,8 +504,7 @@ function updateMapMarkers() {
     arrMarker.setPopupContent(`<b>Arrivo:</b><br>${arr.label}`);
   } else {
     arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') })
-      .bindPopup(`<b>Arrivo:</b><br>${arr.label}`)
-      .addTo(map);
+      .bindPopup(`<b>Arrivo:</b><br>${arr.label}`).addTo(map);
   }
 
   fitMapBounds();
@@ -476,15 +515,19 @@ function fitMapBounds() {
   const points = [];
   if (depMarker) points.push(depMarker.getLatLng());
   if (arrMarker) points.push(arrMarker.getLatLng());
+  if (testMarker) points.push(testMarker.getLatLng());
+  if (userMarker) points.push(userMarker.getLatLng());
   
-  if (userMarker) {
-    const uPos = userMarker.getLatLng();
-    if (uPos.lat >= 42.0 && uPos.lat <= 42.7 && uPos.lng >= 13.0 && uPos.lng <= 14.0) {
-      points.push(uPos);
-    }
-  }
-  
-  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
+}
+
+/* ALLARME GPS E CALCOLO DISTANZA IN METRI */
+function getDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const f1 = lat1 * Math.PI/180, f2 = lat2 * Math.PI/180;
+  const df = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(df/2)*Math.sin(df/2) + Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)*Math.sin(dl/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 function requestGpsPermission(userTriggered = false) {
@@ -494,7 +537,11 @@ function requestGpsPermission(userTriggered = false) {
     return;
   }
 
-  badge.textContent = "Ricerca GPS...";
+  badge.textContent = "GPS in ricerca...";
+
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
 
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -502,11 +549,13 @@ function requestGpsPermission(userTriggered = false) {
       badge.style.color = "var(--green)";
       updateUserLocation(pos);
       startContinuousTracking();
-      if (userTriggered) map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+      if (userTriggered) {
+        alert("🎯 GPS attivo! Verrai avvisato quando ti trovi nei pressi di Via Vasche del Vento 55 o alla fermata.");
+      }
     },
     err => {
-      badge.textContent = "GPS Disattivato";
-      badge.style.color = "var(--text-dim)";
+      badge.textContent = "Permesso GPS negato";
+      badge.style.color = "var(--danger)";
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
@@ -522,13 +571,44 @@ function startContinuousTracking() {
 }
 
 function updateUserLocation(pos) {
-  const userCoords = [pos.coords.latitude, pos.coords.longitude];
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const userCoords = [lat, lng];
+
   if (userMarker) userMarker.setLatLng(userCoords);
   else {
     userMarker = L.marker(userCoords, {
       icon: L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-user"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] })
     }).bindPopup("<b>La tua Posizione</b>").addTo(map);
-    fitMapBounds();
+  }
+
+  // Controlla distanza da Via Vasche del Vento 55 (Test Point)
+  const distTest = getDistanceMeters(lat, lng, STOPS_COORDS.testVasche.lat, STOPS_COORDS.testVasche.lng);
+  const badge = document.getElementById('locStatusBadge');
+  badge.textContent = `GPS: ${Math.round(distTest)}m da Via Vasche`;
+
+  if (distTest < 400 && !alertTriggered) {
+    alertTriggered = true;
+    if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
+    alert("🔔 ALLARME TEST FUNZIONANTE!\nSei vicino a Via Vasche del Vento 55 L'Aquila!");
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("🔔 ALLARME GPS FUNZIONANTE!", { body: "Sei arrivato nei pressi di Via Vasche del Vento 55!" });
+    }
+  }
+}
+
+/* FETCH FEED RSS TUA ABRUZZO */
+async function fetchTUARss() {
+  try {
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tuabruzzo.it/rss.xml')}`);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items.length > 0) {
+      const news = data.items[0];
+      document.getElementById('rssText').innerHTML = `<b>${news.title}</b><br>${news.description.substring(0, 120)}...`;
+      document.getElementById('rssBanner').style.display = 'block';
+    }
+  } catch(e) {
+    console.log("Errore RSS Feed TUA:", e);
   }
 }
 
@@ -580,40 +660,49 @@ function findNextDeparture(){
 function renderNextCard(){
   const card = document.getElementById("nextCard");
   const found = findNextDeparture();
-  if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa nei prossimi 14 giorni.</div>`; return; }
+  if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa prevista.</div>`; return; }
   const {trip, date, dep} = found; const now = new Date();
   const diffMin = Math.round((dep-now)/60000);
   const when = dateStr(date)===dateStr(now) ? (diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`) : `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  const dirName = ROUTES[state.route].directions[state.dir].arrStop;
   card.innerHTML = `
-    <div class="next-label">Prossima corsa</div>
+    <div class="next-label">PROSSIMA CORSA IN ARRIVO</div>
     <div class="next-main">
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
-      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+      <div class="next-times">${trip.p} <small>➔</small> ${trip.a}</div>
     </div>
-    <div class="next-sub">linea ${trip.nome}</div>
-    <div class="next-when">${when}</div>
+    <div class="next-sub">Direzione: <b>${dirName}</b> (Linea ${trip.nome})</div>
+    <div class="next-when">⏱️ Partenza ${when}</div>
   `;
 }
 
+/* LISTA ORARI CHIARA ED ESSENZIALE */
 function renderTripList(){
   const container = document.getElementById("tripList"); container.innerHTML = "";
   const dirInfo = ROUTES[state.route].directions[state.dir];
   const trips = tripsSorted(dirInfo.trips);
   const info = getDayInfo(state.viewedDate);
 
-  if(info.isHoliday){ container.innerHTML = `<div style="padding:10px; color:var(--text-dim);">Nessuna corsa nei giorni festivi.</div>`; return; }
+  if(info.isHoliday){ container.innerHTML = `<div style="padding:16px; text-align:center; color:var(--text-dim);">Nessuna corsa attiva nei giorni festivi.</div>`; return; }
 
   const now = new Date();
   trips.forEach(trip => {
     if(!tripVisible(trip, info)) return;
     const isPassed = dateStr(state.viewedDate)===dateStr(now) && toMinutes(trip.p) < (now.getHours()*60+now.getMinutes());
     const el = document.createElement("div");
-    el.className = "trip" + (isPassed ? " passed" : "");
+    el.className = "trip-card" + (isPassed ? " passed" : "");
     el.innerHTML = `
-      <div class="roundel-sm" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
-      <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
-      <div class="trip-meta"><div style="font-size:13px; font-weight:600;">${trip.nome}</div></div>
-      <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
+      <div class="trip-main-info">
+        <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+        <div class="trip-times-col">
+          <div class="time-dep">Partenza ${trip.p}</div>
+          <div class="time-arr">Arrivo stimato ore ${trip.a}</div>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div class="trip-dest">${trip.nome}</div>
+        <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
+      </div>
     `;
     container.appendChild(el);
   });
@@ -629,7 +718,7 @@ document.getElementById("nextDay").onclick = ()=>{ state.viewedDate = addDays(st
 document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.onclick = ()=> setOverride(el.dataset.v); });
 
 setInterval(renderClockAndChip, 30000);
-renderAll(); loadOverride(); initMap();
+renderAll(); loadOverride(); initMap(); fetchTUARss();
 </script>
 
 <script>
