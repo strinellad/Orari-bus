@@ -40,6 +40,7 @@
     --line-2059: #b08040;
     --line-2064: #4fa88f;
     --line-2007: #7c93a8;
+    --line-2058: #a35a7a;
   }
 
   *{ box-sizing: border-box; }
@@ -167,6 +168,7 @@
   .xbadge.offapp{ background: var(--danger); color:#fff; }
   .xbadge.cartaceo{ background: var(--amber); color:#1b1305; }
   .xbadge.note{ background: var(--surface-2); color: var(--text-dim); font-weight:400; }
+  .xbadge.arrto{ background: #d9432f; color:#fff; }
 
   .selected-card{ border-radius: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; }
   .selected-card .closebtn{ position:absolute; top:10px; right:12px; color:var(--text-dim); font-size:16px; cursor:pointer; }
@@ -186,9 +188,39 @@
   details.info{ margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
   details.info summary{ font-size: 13px; font-weight: 600; cursor:pointer; color: var(--text); }
   .info-body{ margin-top: 10px; font-size: 12.5px; color: var(--text-dim); line-height:1.6; }
+  .stop-alert-overlay{
+    display:none; position:fixed; inset:0; z-index:9999;
+    flex-direction:column; align-items:center; justify-content:center; gap:22px;
+    background: rgba(140,10,10,0.94);
+    animation: flashbg 0.6s steps(1) infinite;
+  }
+  .stop-alert-overlay.show{ display:flex; }
+  @keyframes flashbg{ 50%{ background: rgba(20,20,20,0.97); } }
+  .stop-sign{
+    width: 150px; height: 150px;
+    background: #d9432f; border: 6px solid #fff;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    display:flex; align-items:center; justify-content:center;
+    animation: blinkstop 0.6s steps(1) infinite;
+  }
+  @keyframes blinkstop{ 50%{ opacity: 0.25; transform: scale(0.94); } }
+  .stop-sign-inner{ color:#fff; font-weight:800; font-size:28px; letter-spacing:2px; }
+  .stop-alert-text{ color:#fff; font-size:19px; font-weight:700; text-align:center; max-width:82%; line-height:1.4; }
+  .stop-alert-btn{
+    background:#fff; color:#8c0a0a; border:none; padding: 14px 34px; border-radius: 30px;
+    font-size:16px; font-weight:700; cursor:pointer;
+  }
 </style>
 </head>
 <body>
+
+  <div id="stopAlertOverlay" class="stop-alert-overlay">
+    <div class="stop-sign">
+      <div class="stop-sign-inner">STOP</div>
+    </div>
+    <div class="stop-alert-text" id="stopAlertText">Richiedi la fermata!</div>
+    <button class="stop-alert-btn" onclick="dismissStopAlert()">✓ Ho capito</button>
+  </div>
 <div class="wrap">
 
   <header>
@@ -248,6 +280,7 @@
       <p><b style="color:var(--green)">FA</b> — Feriale Annuale (sempre attiva, tutto l'anno)</p>
       <p><b style="color:var(--amber)">FS</b> — Feriale Scolastico (attiva solo nei giorni di scuola, dal 14/09/2026)</p>
       <p><b style="color:#b0a3d6">FNS</b> — Feriale Non Scolastico (attiva nei periodi di vacanza scolastica)</p>
+      <p><span class="xbadge arrto">🏁 ARRIVA A CENCIONI</span> — questa corsa non arriva fino al Terminal: si ferma prima, a Cencioni (zona cimitero)</p>
       <p><span class="xbadge giro">⚠️ PERCORSO LUNGO</span> — la corsa fa il giro Sant'Eusanio-Villa Sant'Angelo-Stiffe (più lunga, valutala con attenzione)</p>
       <p><span class="xbadge offapp">🚫 NON SU APP TUA</span> — corsa presente in orario ma non mostrata nell'app ufficiale TUA</p>
       <p><span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span> — linea 2005, acquisto solo con biglietto cartaceo, non biglietteria elettronica</p>
@@ -289,6 +322,9 @@ const demetrioFromAQ = [
   {p:"11:40", a:"12:09", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
   {p:"12:10", a:"12:27", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"12:20", a:"13:02", linea:"2001", tipo:"FS", nome:"Bominaco", giro:true},
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FS", nome:"San Demetrio diretta"},
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FNS", nome:"San Demetrio diretta"},
+  {p:"13:20", a:"13:45", linea:"2058", tipo:"FS", nome:"San Demetrio diretta"},
   {p:"13:37", a:"14:20", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", note:"passa dal Terminal"},
   {p:"13:37", a:"14:20", linea:"2064", tipo:"FNS", nome:"San Demetrio-Tussillo", note:"parte dal Terminal", giro:true},
   {p:"14:05", a:"14:28", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina", cartaceo:true},
@@ -306,7 +342,7 @@ const demetrioToAQ = [
   {p:"07:25", a:"07:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
   {p:"07:31", a:"07:55", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina", cartaceo:true},
   {p:"08:30", a:"08:55", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
-  {p:"08:40", a:"09:00", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", note:"ferma al cimitero", stopsAtCencioni:true},
+  {p:"08:40", a:"09:00", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", stopsAtCencioni:true},
   {p:"09:45", a:"10:10", linea:"2001", tipo:"FA", nome:"Bominaco"},
   {p:"09:58", a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Bominaco"},
@@ -369,7 +405,8 @@ const ROUTES = {
 
 const LINE_COLORS = {
   "2001": "var(--line-2001)", "2005": "var(--line-2005)", "2008": "var(--line-2008)",
-  "2046": "var(--line-2046)", "2059": "var(--line-2059)", "2064": "var(--line-2064)", "2007": "var(--line-2007)"
+  "2046": "var(--line-2046)", "2059": "var(--line-2059)", "2064": "var(--line-2064)", "2007": "var(--line-2007)",
+  "2058": "var(--line-2058)"
 };
 
 const SCHOOL_YEAR = { start: "2026-09-14", end: "2027-06-09" };
@@ -464,6 +501,10 @@ const DEMETRIO_ROUTES = {
   "2059": {
     fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"],
     toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","bazzano2","cencioni","terminal"]
+  },
+  "2058": {
+    fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"]
+    // Nessuna corsa di ritorno nota per questa linea.
   },
   "2064": {
     fromAQ:       ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
@@ -613,7 +654,7 @@ async function fetchOSRMRoute() {
     if (data.routes && data.routes.length > 0) {
       osrmFullCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
       computeCumulativeDistances();
-      computeSecondToLastIndex(viaPoints);
+      computeViaPointIndices(viaPoints);
       redrawRoutePolylines();
     }
   } catch(e) {
@@ -629,13 +670,21 @@ function computeCumulativeDistances() {
   }
 }
 
-// Trova, sul tracciato OSRM, l'indice più vicino al penultimo checkpoint (quello subito prima dell'arrivo).
-// Da qui capiamo quando l'utente ha superato quella fermata e si sta dirigendo verso l'ultima.
-function computeSecondToLastIndex(viaPoints) {
+// Calcola, per ogni checkpoint del percorso, l'indice del punto più vicino sul tracciato OSRM.
+// Serve sia per l'alert (penultima fermata superata) sia per l'autozoom "da navigatore".
+let viaPointRouteIdx = []; // [{cp, idx}] in ordine di marcia
+
+function computeViaPointIndices(viaPoints) {
+  viaPointRouteIdx = [];
   secondToLastRouteIdx = null;
-  if (!viaPoints || viaPoints.length < 2) return;
-  const secondLast = viaPoints[viaPoints.length - 2];
-  secondToLastRouteIdx = nearestRouteIndex(secondLast.lat, secondLast.lng, Infinity);
+  if (!viaPoints || viaPoints.length === 0) return;
+  viaPoints.forEach(cp => {
+    const idx = nearestRouteIndex(cp.lat, cp.lng, Infinity);
+    if (idx !== null) viaPointRouteIdx.push({ cp, idx });
+  });
+  if (viaPointRouteIdx.length >= 2) {
+    secondToLastRouteIdx = viaPointRouteIdx[viaPointRouteIdx.length - 2].idx;
+  }
 }
 
 function redrawRoutePolylines() {
@@ -652,7 +701,7 @@ function redrawRoutePolylines() {
   }
 
   const remainingCoords = osrmFullCoords.slice(cutIndex);
-  fullRoutePolyline = L.polyline(remainingCoords, { color: '#e8a33d', weight: 4, opacity: 0.8 }).addTo(map);
+  fullRoutePolyline = L.polyline(remainingCoords, { color: '#3b82f6', weight: 5, opacity: 0.9 }).addTo(map);
 }
 
 // Trova l'indice del punto del tracciato OSRM più vicino a una posizione data,
@@ -675,6 +724,15 @@ function getRouteCoords() {
   } else {
     dep = state.dir === "toAQ" ? STOPS_COORDS.demetrio : STOPS_COORDS.laquila;
     arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.demetrio;
+
+    // Alcune corse di ritorno (es. 2064 delle 8:40) non arrivano al Terminal:
+    // l'arrivo reale, sia per la mappa che per l'alert di prossimità, è Cencioni.
+    if (state.dir === "toAQ") {
+      const trip = selectedOrNextTrip();
+      if (trip && trip.stopsAtCencioni) {
+        arr = { lat: DEMETRIO_CP.cencioni.lat, lng: DEMETRIO_CP.cencioni.lng, label: "Cencioni (cimitero)" };
+      }
+    }
   }
   return { dep, arr };
 }
@@ -734,6 +792,10 @@ function updateUserLocation(pos) {
     redrawRoutePolylines();
   }
 
+  // Autozoom "da navigatore": durante il tracking, la mappa segue tenendo d'occhio
+  // l'ultima fermata passata, la tua posizione e le prossime 2-3 fermate.
+  if (trackingActive) updateNavigatorView(userCoords);
+
   // Aggiorna lo stato "passato" dei checkpoint etichettati, se presenti per questa tratta/linea
   const viaPoints = currentViaPoints();
   if (viaPoints) {
@@ -772,19 +834,60 @@ function updateUserLocation(pos) {
   }
 }
 
+let stopAlertVibrateInterval = null;
+
+let lastNavigatorFitAt = 0;
+
+// Inquadra la mappa come un navigatore: ultima fermata passata, posizione attuale e prossime 2-3 fermate.
+function updateNavigatorView(userCoords) {
+  if (!map) return;
+
+  const now = Date.now();
+  if (now - lastNavigatorFitAt < 4000) return; // non troppo spesso, per fluidità
+  lastNavigatorFitAt = now;
+
+  const points = [userCoords];
+
+  if (viaPointRouteIdx.length > 0) {
+    let lastPassed = null, upcoming = [];
+    viaPointRouteIdx.forEach(v => {
+      if (v.idx <= lastCutIndex) lastPassed = v;
+      else if (upcoming.length < 3) upcoming.push(v);
+    });
+    if (lastPassed) points.push([lastPassed.cp.lat, lastPassed.cp.lng]);
+    upcoming.forEach(v => points.push([v.cp.lat, v.cp.lng]));
+  } else {
+    // Nessun checkpoint per questa linea: inquadra almeno utente e arrivo
+    const { arr } = getRouteCoords();
+    points.push([arr.lat, arr.lng]);
+  }
+
+  if (points.length < 2) {
+    map.flyTo(userCoords, 15, { duration: 1 });
+    return;
+  }
+
+  map.flyToBounds(L.latLngBounds(points), { padding: [50, 50], maxZoom: 16, duration: 1 });
+}
+
 function triggerStopNotification(stopLabel, reason) {
   stopAlertTriggered = true;
 
-  if ("vibrate" in navigator) {
-    navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
-  }
-
   const title = "🔔 RICHIEDI FERMATA!";
   const msg = reason === "penultima"
-    ? `🚌 Hai già superato la fermata precedente da un po': la prossima è ${stopLabel}. Premi il pulsante prenotazione!`
-    : `🚌 Il bus si sta avvicinando a ${stopLabel} (meno di ${ALERT_DISTANCE_METERS}m). Premi il pulsante prenotazione!`;
+    ? `Hai già superato la fermata precedente da un po': la prossima è ${stopLabel}. Premi il pulsante prenotazione!`
+    : `Il bus si sta avvicinando a ${stopLabel} (meno di ${ALERT_DISTANCE_METERS}m). Premi il pulsante prenotazione!`;
 
-  alert(`${title}\n\n${msg}`);
+  // Overlay a schermo intero, lampeggiante, con segnale di stop
+  document.getElementById('stopAlertText').textContent = msg;
+  document.getElementById('stopAlertOverlay').classList.add('show');
+
+  // Vibrazione: scatta subito e si ripete finché non viene chiusa
+  if ("vibrate" in navigator) {
+    navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
+    if (stopAlertVibrateInterval) clearInterval(stopAlertVibrateInterval);
+    stopAlertVibrateInterval = setInterval(() => navigator.vibrate([1000, 250, 1000]), 3000);
+  }
 
   if ("Notification" in window && Notification.permission === "granted") {
     new Notification(title, {
@@ -793,6 +896,12 @@ function triggerStopNotification(stopLabel, reason) {
       vibrate: [1000, 250, 1000, 250, 1000]
     });
   }
+}
+
+function dismissStopAlert() {
+  document.getElementById('stopAlertOverlay').classList.remove('show');
+  if (stopAlertVibrateInterval) { clearInterval(stopAlertVibrateInterval); stopAlertVibrateInterval = null; }
+  if ("vibrate" in navigator) navigator.vibrate(0);
 }
 
 /* TRACKING PERSISTENTE (corsa fissata in primo piano) */
@@ -876,6 +985,7 @@ function stopTracking(manual) {
   releaseWakeLock();
   updateTrackButtonUI();
   renderTripList(); renderSelectedCard();
+  if (map) fitMapBounds();
   if (!manual) {
     alert("🎉 Sei arrivato a destinazione! Il tracking si è fermato automaticamente.");
   }
@@ -963,11 +1073,19 @@ function tripKey(trip){ return `${trip.linea}|${trip.p}|${trip.a}|${trip.tipo}|$
 
 function tripExtrasHtml(trip){
   let extras = "";
+  if(trip.stopsAtCencioni) extras += `<span class="xbadge arrto">🏁 ARRIVA A CENCIONI, NON AL TERMINAL</span>`;
   if(trip.giro) extras += `<span class="xbadge giro">⚠️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
   if(trip.cartaceo) extras += `<span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span>`;
   if(trip.offApp) extras += `<span class="xbadge offapp">🚫 NON SU APP TUA</span>`;
   if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
   return extras;
+}
+
+// Restituisce la fermata di arrivo reale per la corsa: alcune corse (es. 2064 delle 8:40)
+// non arrivano fino al Terminal ma si fermano prima, a Cencioni (zona cimitero).
+function tripArrStopLabel(trip, dirInfo){
+  if(trip && trip.stopsAtCencioni) return `<span style="color:var(--danger); font-weight:700;">Piazzale Cencioni (cimitero) — NON il Terminal!</span>`;
+  return dirInfo.arrStop;
 }
 
 // A parità di orario di partenza, priorità alla corsa che arriva prima (orario di arrivo più basso).
@@ -1005,7 +1123,7 @@ function renderNextCard(){
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
     </div>
-    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${dirInfo.arrStop}</b></div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b></div>
     <div class="next-when">⏱️ Partenza ${when}</div>
   `;
 }
@@ -1031,7 +1149,7 @@ function renderTripList(){
       <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
       <div class="trip-meta">
         <div class="trip-meta-title">${trip.nome} <span style="color:var(--text-dim); font-weight:400;">(${tripDuration(trip)}m)</span></div>
-        <div class="trip-meta-sub">Da ${dirInfo.depStop} a ${dirInfo.arrStop}</div>
+        <div class="trip-meta-sub">Da ${dirInfo.depStop} a ${tripArrStopLabel(trip, dirInfo)}</div>
         ${extras ? `<div class="trip-extra">${extras}</div>` : ""}
       </div>
       <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
@@ -1064,7 +1182,7 @@ function renderSelectedCard(){
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
     </div>
-    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${dirInfo.arrStop}</b> • ${tripDuration(trip)} min • <span class="badge ${trip.tipo.toLowerCase()}" style="padding:2px 6px;">${trip.tipo}</span></div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b> • ${tripDuration(trip)} min • <span class="badge ${trip.tipo.toLowerCase()}" style="padding:2px 6px;">${trip.tipo}</span></div>
     ${extras ? `<div class="trip-extra" style="margin-top:8px;">${extras}</div>` : ""}
     ${trackingActive ? `<div style="margin-top:8px; font-size:11.5px; color:var(--text-dim);">Questa corsa resta fissata finché non arrivi o premi ✕.</div>` : ""}
   `;
