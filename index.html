@@ -41,12 +41,15 @@
     --line-2064: #4fa88f;
     --line-2007: #7c93a8;
     --line-2058: #a35a7a;
+
+    --shadow: 0 10px 28px -14px rgba(0,0,0,0.55);
+    --shadow-sm: 0 4px 14px -8px rgba(0,0,0,0.45);
   }
 
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
-    background: var(--bg);
+    background: radial-gradient(circle at 18% -8%, rgba(232,163,61,0.09), transparent 42%), var(--bg);
     color: var(--text);
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -69,6 +72,8 @@
     font-weight: 700;
     margin: 0;
     letter-spacing: -0.01em;
+    background: linear-gradient(90deg, var(--text), var(--amber) 140%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .clock{
     font-family: 'IBM Plex Mono', monospace;
@@ -85,6 +90,7 @@
     margin-bottom: 14px;
     display: none;
     min-height: 68px;
+    box-shadow: var(--shadow-sm);
   }
   .rss-title { font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 4px; letter-spacing: 0.5px; }
   .rss-content-box { opacity: 1; transition: opacity 0.4s ease-in-out; }
@@ -113,26 +119,30 @@
   .calopt.active{ background: var(--amber); color: #1b1305; border-color: var(--amber); font-weight: 600; }
 
   .tabbar{ display:flex; gap:8px; margin: 18px 0 10px; }
-  .tab{ flex:1; text-align:center; padding: 11px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor:pointer; user-select:none; }
-  .tab.active{ background: var(--surface-2); color: var(--text); border-color: var(--amber); }
+  .tab{ flex:1; text-align:center; padding: 11px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor:pointer; user-select:none; transition: border-color .15s, box-shadow .15s; }
+  .tab.active{ background: var(--surface-2); color: var(--text); border-color: var(--amber); box-shadow: 0 0 0 1px rgba(232,163,61,0.25); }
 
   .dirbar{ display:flex; gap:6px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
   .dirbtn{ flex:1; text-align:center; padding: 9px 6px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--text-dim); cursor:pointer; user-select:none; }
   .dirbtn.active{ background: var(--amber); color: #1b1305; font-weight: 600; }
 
-  .next-card{ border-radius: 16px; padding: 18px 18px 16px; background: linear-gradient(155deg, var(--surface-2), var(--surface)); border: 1px solid rgba(232,163,61,0.4); margin-bottom: 22px; position: relative; overflow:hidden; }
+  .next-card{ border-radius: 16px; padding: 18px 18px 16px; background: linear-gradient(155deg, var(--surface-2), var(--surface)); border: 1px solid rgba(232,163,61,0.4); margin-bottom: 22px; position: relative; overflow:hidden; box-shadow: var(--shadow); }
   .next-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background: var(--amber); opacity:.8; }
-  .next-label{ font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 10px; }
+  .next-label{ font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 10px; letter-spacing: 0.3px; }
   .next-main{ display:flex; align-items:center; gap:12px; }
-  .roundel{ flex:none; width: 42px; height:42px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216; }
+  .roundel{ flex:none; width: 42px; height:42px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 12px; color: #0e1216; box-shadow: 0 0 0 3px rgba(255,255,255,0.05), var(--shadow-sm); }
   .next-times{ font-family:'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; line-height:1.1; }
   .next-sub{ margin-top: 8px; font-size: 13px; color: var(--text-dim); }
   .next-when{ margin-top: 10px; font-size: 13px; color: var(--amber); font-weight: 600; }
 
-  .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 22px; }
+  .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 22px; box-shadow: var(--shadow-sm); }
   .map-header{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px; }
-  .map-title{ font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .map-actions{ display: flex; align-items: center; gap: 6px; }
+  .map-title{ font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0; }
+  .progress-track{ height: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-bottom: 10px; }
+  .progress-fill{ height: 100%; background: linear-gradient(90deg, #4fa88f, #3b82f6); border-radius: 4px; transition: width 0.6s ease; }
+  .tua-search-btn{ display:block; width:100%; margin-bottom:16px; padding:11px; border-radius:12px; border:1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition: background .15s, color .15s; }
+  .tua-search-btn:active{ background: var(--surface-2); color: var(--text); }
+  .map-actions{ display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .loc-badge{ font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--text-dim); }
   .gps-btn { background: var(--amber-soft); border: 1px solid rgba(232,163,61,0.4); color: var(--amber); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
   .gps-btn.tracking{ background: var(--danger); border-color: var(--danger); color: #fff; animation: pulse 2s infinite; }
@@ -170,10 +180,10 @@
   .xbadge.note{ background: var(--surface-2); color: var(--text-dim); font-weight:400; }
   .xbadge.arrto{ background: #d9432f; color:#fff; }
 
-  .selected-card{ border-radius: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; }
+  .selected-card{ border-radius: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; box-shadow: var(--shadow); }
   .selected-card .closebtn{ position:absolute; top:10px; right:12px; color:var(--text-dim); font-size:16px; cursor:pointer; }
   .selected-label{ font-size: 11px; color: var(--amber); font-weight: 600; margin-bottom: 8px; letter-spacing:.4px; }
-  .roundel-sm{ flex:none; width: 34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 10.5px; color:#0e1216; }
+  .roundel-sm{ flex:none; width: 34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 10.5px; color:#0e1216; box-shadow: 0 0 0 2px rgba(255,255,255,0.05); }
   .trip-times{ font-family:'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; white-space:nowrap; }
   .trip-times .arrow{ color: var(--text-dim); font-weight:400; margin:0 4px; }
   .trip-meta{ flex:1; min-width:0; }
@@ -248,6 +258,8 @@
   <div class="tabbar" id="routeTabs"></div>
   <div class="dirbar" id="dirTabs"></div>
 
+  <button class="tua-search-btn" onclick="openTuaSearch()">🔎 Cerca questa tratta sull'app TUA</button>
+
   <div class="next-card" id="nextCard"></div>
 
   <div class="selected-card" id="selectedCard" style="display:none;"></div>
@@ -260,6 +272,7 @@
         <button class="gps-btn" id="trackBtn" onclick="toggleTracking()">🔔 Attiva Alert</button>
       </div>
     </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     <div id="map"></div>
   </div>
 
@@ -306,9 +319,9 @@ const OCRE_CHECKPOINTS = [
 ];
 
 const STOPS_COORDS = {
-  ocre: { lat: 42.285278, lng: 13.473750, label: "San Panfilo d'Ocre (Arrivo)" },
-  demetrio: { lat: 42.2905166, lng: 13.5583944, label: "San Demetrio Uff. Postale" },
-  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio" }
+  ocre: { lat: 42.285278, lng: 13.473750, label: "San Panfilo d'Ocre (Arrivo)", shortLabel: "San Panfilo d'Ocre" },
+  demetrio: { lat: 42.2905166, lng: 13.5583944, label: "San Demetrio Uff. Postale", shortLabel: "San Demetrio" },
+  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio", shortLabel: "L'Aquila" }
 };
 
 /* ORARI */
@@ -351,7 +364,7 @@ const demetrioToAQ = [
   {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
   {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
-  {p:"17:10", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo", giro:true },
+  {p:"17:10", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo", giro:true},
   {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"}
 ];
 
@@ -416,6 +429,32 @@ const HOLIDAYS = ["2026-10-04","2026-11-01","2026-12-08","2026-12-25","2026-12-2
 function pad(n){ return String(n).padStart(2,"0"); }
 function dateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// Apre la pagina di ricerca dell'app TUA (mycicero) per la tratta e direzione correnti,
+// usando come data/ora quella del giorno selezionato in app (oggi = adesso, altro giorno = ore 8:00).
+function openTuaSearch(){
+  const AQ = { text: "L'Aquila, Aquila, ITA", lat: 42.35055, lng: 13.39954 };
+  const DEST = state.route === "ocre"
+    ? { text: "San Panfilo d'Ocre, L'Aquila, ITA", lat: STOPS_COORDS.ocre.lat, lng: STOPS_COORDS.ocre.lng }
+    : { text: "San Demetrio ne' Vestini, L'Aquila, ITA", lat: 42.2880401, lng: 13.5581851 };
+
+  const start = state.dir === "fromAQ" ? AQ : DEST;
+  const end = state.dir === "fromAQ" ? DEST : AQ;
+
+  const viewed = state.viewedDate;
+  const now = new Date();
+  const isToday = dateStr(viewed) === dateStr(now);
+  const searchDate = isToday ? now : new Date(viewed.getFullYear(), viewed.getMonth(), viewed.getDate(), 8, 0, 0);
+
+  const params = new URLSearchParams({
+    a: "1", c: "0", w: "0", t: "3,15", aw: "0",
+    d: String(searchDate.getTime()),
+    st: start.text, sa: start.text, slat: start.lat, slng: start.lng,
+    et: end.text, ea: end.text, elat: end.lat, elng: end.lng
+  });
+
+  window.open(`https://tua.mycicero.it/TPWebPortal/it/solutions?${params.toString()}`, "_blank");
+}
 function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
 
 let scolasticoOverride = null;
@@ -436,12 +475,11 @@ function getDayInfo(date){
   return {ds, dow, isHoliday, isScolastico};
 }
 
-function loadOverride(){
+function loadScolasticoOverride(){
   try {
     const r = localStorage.getItem('scolastico-override');
     if(r) scolasticoOverride = r==="si" ? true : (r==="no" ? false : null);
   } catch(e){}
-  renderCalBar(); renderAll();
 }
 
 function setOverride(v){
@@ -604,14 +642,13 @@ function currentViaPoints() {
 
 function updateMapMarkers() {
   if (!map) return;
-  
-  cpMarkers.forEach(m => map.removeLayer(m));
-  cpMarkers = [];
+
   if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
   if (passedPolyline) map.removeLayer(passedPolyline);
+  const pf = document.getElementById('progressFill'); if (pf) pf.style.width = "0%";
 
   const { dep, arr } = getRouteCoords();
-  document.getElementById('mapTitle').textContent = `🗺️ ${dep.label.split(' ')[0]} ➔ ${arr.label.split(' ')[0]}`;
+  document.getElementById('mapTitle').textContent = `🗺️ ${dep.shortLabel || dep.label} ➔ ${arr.shortLabel || arr.label}`;
 
   if (depMarker) depMarker.setLatLng([dep.lat, dep.lng]);
   else depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
@@ -621,8 +658,17 @@ function updateMapMarkers() {
   else arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
   arrMarker.bindPopup(`<b>Arrivo:</b><br>${arr.label}`);
 
-  fetchOSRMRoute();
+  redrawCpMarkers();
+  fetchOSRMRoute(); // chiamata di rete: solo qui, al cambio di corsa/tratta/direzione
 
+  if (!trackingActive) fitMapBounds();
+}
+
+// Ridisegna solo i marcatori dei checkpoint (nessuna chiamata di rete): sicuro da richiamare
+// spesso, ad esempio ogni volta che si supera un checkpoint durante il tracking.
+function redrawCpMarkers() {
+  cpMarkers.forEach(m => map.removeLayer(m));
+  cpMarkers = [];
   const viaPoints = currentViaPoints();
   if (viaPoints) {
     const lastIdx = viaPoints.length - 1;
@@ -635,8 +681,6 @@ function updateMapMarkers() {
       cpMarkers.push(m);
     });
   }
-
-  fitMapBounds();
 }
 
 async function fetchOSRMRoute() {
@@ -702,11 +746,22 @@ function redrawRoutePolylines() {
 
   const remainingCoords = osrmFullCoords.slice(cutIndex);
   fullRoutePolyline = L.polyline(remainingCoords, { color: '#3b82f6', weight: 5, opacity: 0.9 }).addTo(map);
+
+  updateProgressBar(cutIndex);
+}
+
+function updateProgressBar(cutIndex) {
+  const fill = document.getElementById('progressFill');
+  if (!fill) return;
+  const total = routeCumDist.length ? routeCumDist[routeCumDist.length - 1] : 0;
+  if (!total) { fill.style.width = "0%"; return; }
+  const pct = Math.max(0, Math.min(100, (routeCumDist[Math.min(cutIndex, routeCumDist.length - 1)] / total) * 100));
+  fill.style.width = `${pct}%`;
 }
 
 // Trova l'indice del punto del tracciato OSRM più vicino a una posizione data,
 // entro una distanza massima ragionevole (per non "agganciare" il tracciato se si è fuori percorso).
-function nearestRouteIndex(lat, lng, maxDist = 300) {
+function nearestRouteIndex(lat, lng, maxDist = 450) {
   if (osrmFullCoords.length === 0) return null;
   let minD = Infinity, minI = -1;
   osrmFullCoords.forEach((pt, i) => {
@@ -730,7 +785,7 @@ function getRouteCoords() {
     if (state.dir === "toAQ") {
       const trip = selectedOrNextTrip();
       if (trip && trip.stopsAtCencioni) {
-        arr = { lat: DEMETRIO_CP.cencioni.lat, lng: DEMETRIO_CP.cencioni.lng, label: "Cencioni (cimitero)" };
+        arr = { lat: DEMETRIO_CP.cencioni.lat, lng: DEMETRIO_CP.cencioni.lng, label: "Cencioni (cimitero)", shortLabel: "Cencioni" };
       }
     }
   }
@@ -804,7 +859,7 @@ function updateUserLocation(pos) {
       const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
       if (dist < 200 && idx > lastPassedCPIndex) {
         lastPassedCPIndex = idx;
-        updateMapMarkers();
+        redrawCpMarkers();
       }
     });
   }
@@ -974,9 +1029,6 @@ function toggleTracking() {
   saveActiveTracking();
   requestWakeLock();
   renderTripList(); renderSelectedCard(); updateTrackButtonUI();
-
-  const { arr } = getRouteCoords();
-  alert(`🔔 Tracking attivato!\nQuesta corsa resta fissata in primo piano: riceverai notifica e vibrazione in prossimità di ${arr.label}.\nSe chiudi e riapri l'app riprenderà da qui; si ferma da sola all'arrivo o toccando "Ferma tracking".`);
 }
 
 function stopTracking(manual) {
@@ -1199,7 +1251,9 @@ document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.o
 
 setInterval(renderClockAndChip, 30000);
 loadActiveTrackingOnInit();
-renderAll(); loadOverride(); initMap(); fetchTUARss(); updateTrackButtonUI();
+loadScolasticoOverride();
+renderCalBar();
+renderAll(); initMap(); fetchTUARss(); updateTrackButtonUI();
 if (trackingActive) requestWakeLock();
 </script>
 
