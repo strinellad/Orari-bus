@@ -1126,7 +1126,7 @@ function tripKey(trip){ return `${trip.linea}|${trip.p}|${trip.a}|${trip.tipo}|$
 function tripExtrasHtml(trip){
   let extras = "";
   if(trip.stopsAtCencioni) extras += `<span class="xbadge arrto">🏁 ARRIVA A CENCIONI, NON AL TERMINAL</span>`;
-  if(trip.giro) extras += `<span class="xbadge giro">⚠️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
+  if(trip.giro) extras += `<span class="xbadge giro"> 🛣️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
   if(trip.cartaceo) extras += `<span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span>`;
   if(trip.offApp) extras += `<span class="xbadge offapp">🚫 NON SU APP TUA</span>`;
   if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
