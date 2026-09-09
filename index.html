@@ -134,6 +134,8 @@
   .map-actions{ display: flex; align-items: center; gap: 6px; }
   .loc-badge{ font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--text-dim); }
   .gps-btn { background: var(--amber-soft); border: 1px solid rgba(232,163,61,0.4); color: var(--amber); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
+  .gps-btn.tracking{ background: var(--danger); border-color: var(--danger); color: #fff; animation: pulse 2s infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.7; } }
 
   #map{ height: 260px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #12181f; }
 
@@ -160,11 +162,11 @@
   .trip.passed{ opacity: 0.38; }
   .trip.selected{ background: var(--amber-soft); border-left-color: var(--amber); border-radius: 8px; }
   .trip-extra{ display:flex; gap:4px; margin-top:3px; flex-wrap:wrap; }
-  .xbadge{ font-size:9.5px; padding:2px 6px; border-radius:5px; line-height:1.5; }
-  .xbadge.giro{ background: rgba(139,111,176,0.16); color:#b0a3d6; }
-  .xbadge.offapp{ background: var(--danger-soft); color: var(--danger); }
-  .xbadge.cartaceo{ background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
-  .xbadge.note{ background: var(--surface-2); color: var(--text-dim); }
+  .xbadge{ font-size:10px; padding:2px 7px; border-radius:5px; line-height:1.6; font-weight:600; }
+  .xbadge.giro{ background: #8b6fb0; color:#fff; }
+  .xbadge.offapp{ background: var(--danger); color:#fff; }
+  .xbadge.cartaceo{ background: var(--amber); color:#1b1305; }
+  .xbadge.note{ background: var(--surface-2); color: var(--text-dim); font-weight:400; }
 
   .selected-card{ border-radius: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; }
   .selected-card .closebtn{ position:absolute; top:10px; right:12px; color:var(--text-dim); font-size:16px; cursor:pointer; }
@@ -223,7 +225,7 @@
       <span id="mapTitle" class="map-title">🗺️ Mappa Percorso</span>
       <div class="map-actions">
         <span id="locStatusBadge" class="loc-badge">GPS Inattivo</span>
-        <button class="gps-btn" onclick="enableAlertsAndPermission()">🔔 Attiva Alert</button>
+        <button class="gps-btn" id="trackBtn" onclick="toggleTracking()">🔔 Attiva Alert</button>
       </div>
     </div>
     <div id="map"></div>
@@ -246,9 +248,9 @@
       <p><b style="color:var(--green)">FA</b> — Feriale Annuale (sempre attiva, tutto l'anno)</p>
       <p><b style="color:var(--amber)">FS</b> — Feriale Scolastico (attiva solo nei giorni di scuola, dal 14/09/2026)</p>
       <p><b style="color:#b0a3d6">FNS</b> — Feriale Non Scolastico (attiva nei periodi di vacanza scolastica)</p>
-      <p><span class="xbadge giro">giro</span> — la corsa fa il giro Sant'Eusanio-Villa Sant'Angelo-Stiffe (più lunga)</p>
-      <p><span class="xbadge offapp">⚠ non su app TUA</span> — corsa presente in orario ma non mostrata nell'app ufficiale TUA</p>
-      <p><span class="xbadge cartaceo">biglietto cartaceo</span> — linea 2005, acquisto solo con biglietto cartaceo</p>
+      <p><span class="xbadge giro">⚠️ PERCORSO LUNGO</span> — la corsa fa il giro Sant'Eusanio-Villa Sant'Angelo-Stiffe (più lunga, valutala con attenzione)</p>
+      <p><span class="xbadge offapp">🚫 NON SU APP TUA</span> — corsa presente in orario ma non mostrata nell'app ufficiale TUA</p>
+      <p><span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span> — linea 2005, acquisto solo con biglietto cartaceo, non biglietteria elettronica</p>
       <p>Tocca una corsa nell'elenco per selezionarla e vederne i dettagli.</p>
     </div>
   </details>
@@ -499,10 +501,18 @@ function getDemetrioRouteKeys(linea, dir, trip) {
 
 let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
 let fullRoutePolyline = null, passedPolyline = null, cpMarkers = [];
-let osrmFullCoords = []; // Punti geodetichi completi da OSRM
+let osrmFullCoords = [];   // Punti geodetichi completi da OSRM
+let routeCumDist = [];     // Distanza cumulativa (metri) lungo osrmFullCoords, stesso indice
+let secondToLastRouteIdx = null; // Indice sul tracciato del penultimo checkpoint (quello prima dell'arrivo)
 let lastPassedCPIndex = -1; // usato solo per i checkpoint etichettati
 let lastCutIndex = 0;       // indice sul tracciato OSRM fino a cui colorare di verde (avanzamento continuo)
 let stopAlertTriggered = false;
+let trackingActive = false; // true quando l'utente ha fissato una corsa e attivato l'alert
+let wakeLockRef = null;
+
+const ALERT_DISTANCE_METERS = 200;      // soglia di prossimità diretta alla fermata di arrivo
+const AFTER_PENULTIMATE_MARGIN = 250;   // metri percorsi oltre il penultimo checkpoint prima di avvisare
+const ARRIVED_DISTANCE_METERS = 60;     // sotto questa distanza si considera "arrivato" e si ferma il tracking
 
 function createDivIcon(className, text) {
   return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
@@ -602,11 +612,30 @@ async function fetchOSRMRoute() {
     
     if (data.routes && data.routes.length > 0) {
       osrmFullCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      computeCumulativeDistances();
+      computeSecondToLastIndex(viaPoints);
       redrawRoutePolylines();
     }
   } catch(e) {
     console.log("Errore OSRM Route:", e);
   }
+}
+
+function computeCumulativeDistances() {
+  routeCumDist = [0];
+  for (let i = 1; i < osrmFullCoords.length; i++) {
+    const d = getDistanceMeters(osrmFullCoords[i-1][0], osrmFullCoords[i-1][1], osrmFullCoords[i][0], osrmFullCoords[i][1]);
+    routeCumDist.push(routeCumDist[i-1] + d);
+  }
+}
+
+// Trova, sul tracciato OSRM, l'indice più vicino al penultimo checkpoint (quello subito prima dell'arrivo).
+// Da qui capiamo quando l'utente ha superato quella fermata e si sta dirigendo verso l'ultima.
+function computeSecondToLastIndex(viaPoints) {
+  secondToLastRouteIdx = null;
+  if (!viaPoints || viaPoints.length < 2) return;
+  const secondLast = viaPoints[viaPoints.length - 2];
+  secondToLastRouteIdx = nearestRouteIndex(secondLast.lat, secondLast.lng, Infinity);
 }
 
 function redrawRoutePolylines() {
@@ -667,14 +696,6 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function enableAlertsAndPermission() {
-  if ("Notification" in window && Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-  const { arr } = getRouteCoords();
-  alert(`🔔 Alert fermata attivato con successo!\nRiceverai notifiche e vibrazione quando sei in prossimità di ${arr.label}.`);
-}
-
 function startContinuousTracking() {
   if (!navigator.geolocation) return;
   if (watchGpsId !== null) navigator.geolocation.clearWatch(watchGpsId);
@@ -726,19 +747,32 @@ function updateUserLocation(pos) {
     });
   }
 
-  // Alert di prossimità alla fermata di arrivo corrente, valido per qualsiasi tratta/direzione
   const { arr } = getRouteCoords();
   const distToArr = getDistanceMeters(lat, lng, arr.lat, arr.lng);
-  const isMovingFast = speed > 12;
-  const routeProgress = osrmFullCoords.length > 1 ? lastCutIndex / (osrmFullCoords.length - 1) : 0;
-  const madeGoodProgress = routeProgress > 0.5;
 
-  if ((isMovingFast || madeGoodProgress) && distToArr < 450 && !stopAlertTriggered) {
-    triggerStopNotification(arr.label);
+  // Arrivo rilevato: se il tracking è attivo, si ferma da solo
+  if (trackingActive && distToArr < ARRIVED_DISTANCE_METERS) {
+    stopTracking(false);
+    return;
+  }
+
+  if (!stopAlertTriggered) {
+    // 1) Prossimità diretta alla fermata di arrivo
+    if (distToArr < ALERT_DISTANCE_METERS) {
+      triggerStopNotification(arr.label, "vicino");
+    }
+    // 2) La penultima fermata è già stata superata da un po': la prossima è la tua
+    else if (secondToLastRouteIdx !== null && lastCutIndex >= secondToLastRouteIdx) {
+      const cur = routeCumDist[Math.min(lastCutIndex, routeCumDist.length - 1)] || 0;
+      const atPenultimate = routeCumDist[Math.min(secondToLastRouteIdx, routeCumDist.length - 1)] || 0;
+      if ((cur - atPenultimate) >= AFTER_PENULTIMATE_MARGIN) {
+        triggerStopNotification(arr.label, "penultima");
+      }
+    }
   }
 }
 
-function triggerStopNotification(stopLabel) {
+function triggerStopNotification(stopLabel, reason) {
   stopAlertTriggered = true;
 
   if ("vibrate" in navigator) {
@@ -746,7 +780,9 @@ function triggerStopNotification(stopLabel) {
   }
 
   const title = "🔔 RICHIEDI FERMATA!";
-  const msg = `🚌 Il bus si sta avvicinando alla fermata di ${stopLabel}. Premi il pulsante prenotazione!`;
+  const msg = reason === "penultima"
+    ? `🚌 Hai già superato la fermata precedente da un po': la prossima è ${stopLabel}. Premi il pulsante prenotazione!`
+    : `🚌 Il bus si sta avvicinando a ${stopLabel} (meno di ${ALERT_DISTANCE_METERS}m). Premi il pulsante prenotazione!`;
 
   alert(`${title}\n\n${msg}`);
 
@@ -756,6 +792,92 @@ function triggerStopNotification(stopLabel) {
       icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
       vibrate: [1000, 250, 1000, 250, 1000]
     });
+  }
+}
+
+/* TRACKING PERSISTENTE (corsa fissata in primo piano) */
+
+function saveActiveTracking() {
+  try {
+    localStorage.setItem('activeTracking', JSON.stringify({
+      route: state.route, dir: state.dir, tripKey: state.selectedTripKey
+    }));
+  } catch(e) {}
+}
+
+function clearActiveTracking() {
+  try { localStorage.removeItem('activeTracking'); } catch(e) {}
+}
+
+function loadActiveTrackingOnInit() {
+  try {
+    const raw = localStorage.getItem('activeTracking');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && data.route && ROUTES[data.route]) {
+      state.route = data.route;
+      state.dir = data.dir || "fromAQ";
+      state.selectedTripKey = data.tripKey || null;
+      trackingActive = true;
+    }
+  } catch(e) {}
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      wakeLockRef.addEventListener('release', () => { wakeLockRef = null; });
+    }
+  } catch(e) { console.log("Wake Lock non disponibile:", e); }
+}
+
+function releaseWakeLock() {
+  if (wakeLockRef) { wakeLockRef.release().catch(()=>{}); wakeLockRef = null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (trackingActive && document.visibilityState === 'visible' && wakeLockRef === null) {
+    requestWakeLock();
+  }
+});
+
+function updateTrackButtonUI() {
+  const btn = document.getElementById('trackBtn');
+  if (!btn) return;
+  btn.textContent = trackingActive ? "⏹ Ferma tracking" : "🔔 Attiva Alert";
+  btn.classList.toggle("tracking", trackingActive);
+}
+
+function toggleTracking() {
+  if (trackingActive) { stopTracking(true); return; }
+
+  if (!state.selectedTripKey) {
+    const found = findNextDeparture();
+    if (found) state.selectedTripKey = tripKey(found.trip);
+  }
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
+  trackingActive = true;
+  stopAlertTriggered = false;
+  saveActiveTracking();
+  requestWakeLock();
+  renderTripList(); renderSelectedCard(); updateTrackButtonUI();
+
+  const { arr } = getRouteCoords();
+  alert(`🔔 Tracking attivato!\nQuesta corsa resta fissata in primo piano: riceverai notifica e vibrazione in prossimità di ${arr.label}.\nSe chiudi e riapri l'app riprenderà da qui; si ferma da sola all'arrivo o toccando "Ferma tracking".`);
+}
+
+function stopTracking(manual) {
+  trackingActive = false;
+  clearActiveTracking();
+  releaseWakeLock();
+  updateTrackButtonUI();
+  renderTripList(); renderSelectedCard();
+  if (!manual) {
+    alert("🎉 Sei arrivato a destinazione! Il tracking si è fermato automaticamente.");
   }
 }
 
@@ -814,7 +936,7 @@ function renderTabs(){
   Object.entries(ROUTES).forEach(([key,r])=>{
     const el = document.createElement("div");
     el.className = "tab" + (state.route===key ? " active":""); el.textContent = r.label;
-    el.onclick = ()=>{ state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     routeTabs.appendChild(el);
   });
 
@@ -822,7 +944,7 @@ function renderTabs(){
   Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
     const el = document.createElement("div");
     el.className = "dirbtn" + (state.dir===key ? " active":""); el.textContent = d.label;
-    el.onclick = ()=>{ state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     dirTabs.appendChild(el);
   });
 }
@@ -839,8 +961,18 @@ function renderClockAndChip(){
 function tripDuration(trip){ return toMinutes(trip.a)-toMinutes(trip.p); }
 function tripKey(trip){ return `${trip.linea}|${trip.p}|${trip.a}|${trip.tipo}|${trip.nome}`; }
 
+function tripExtrasHtml(trip){
+  let extras = "";
+  if(trip.giro) extras += `<span class="xbadge giro">⚠️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
+  if(trip.cartaceo) extras += `<span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span>`;
+  if(trip.offApp) extras += `<span class="xbadge offapp">🚫 NON SU APP TUA</span>`;
+  if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
+  return extras;
+}
+
+// A parità di orario di partenza, priorità alla corsa che arriva prima (orario di arrivo più basso).
 function tripsSorted(trips){
-  return [...trips].sort((a,b)=> toMinutes(a.p)-toMinutes(b.p) || tripDuration(a)-tripDuration(b));
+  return [...trips].sort((a,b)=> toMinutes(a.p)-toMinutes(b.p) || toMinutes(a.a)-toMinutes(b.a));
 }
 
 function findNextDeparture(){
@@ -893,11 +1025,7 @@ function renderTripList(){
     const key = tripKey(trip);
     const el = document.createElement("div");
     el.className = "trip" + (isPassed ? " passed" : "") + (state.selectedTripKey===key ? " selected" : "");
-    let extras = "";
-    if(trip.giro) extras += `<span class="xbadge giro">giro Sant'Eusanio-V.S.Angelo-Stiffe</span>`;
-    if(trip.cartaceo) extras += `<span class="xbadge cartaceo">biglietto cartaceo</span>`;
-    if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
-    if(trip.offApp) extras += `<span class="xbadge offapp">⚠ non su app TUA</span>`;
+    const extras = tripExtrasHtml(trip);
     el.innerHTML = `
       <div class="roundel-sm" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
@@ -908,7 +1036,11 @@ function renderTripList(){
       </div>
       <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
     `;
-    el.onclick = ()=>{ state.selectedTripKey = (state.selectedTripKey===key ? null : key); renderTripList(); renderSelectedCard(); updateMapMarkers(); };
+    el.onclick = ()=>{
+      if(trackingActive && state.selectedTripKey===key){ stopTracking(true); }
+      state.selectedTripKey = (state.selectedTripKey===key ? null : key);
+      renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();
+    };
     container.appendChild(el);
   });
 }
@@ -921,22 +1053,20 @@ function renderSelectedCard(){
   const trip = dirInfo.trips.find(t => tripKey(t)===state.selectedTripKey);
   if(!trip){ card.style.display = "none"; state.selectedTripKey = null; return; }
 
-  let extras = "";
-  if(trip.giro) extras += `<span class="xbadge giro">giro Sant'Eusanio-V.S.Angelo-Stiffe</span>`;
-  if(trip.cartaceo) extras += `<span class="xbadge cartaceo">biglietto cartaceo</span>`;
-  if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
-  if(trip.offApp) extras += `<span class="xbadge offapp">⚠ non risulta sull'app TUA</span>`;
+  const extras = tripExtrasHtml(trip);
 
   card.style.display = "block";
+  card.style.borderColor = trackingActive ? "var(--danger)" : "var(--amber)";
   card.innerHTML = `
-    <span class="closebtn" onclick="state.selectedTripKey=null; renderTripList(); renderSelectedCard(); updateMapMarkers();">✕</span>
-    <div class="selected-label">CORSA SELEZIONATA</div>
+    <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
+    <div class="selected-label" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</div>
     <div class="next-main">
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
     </div>
     <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${dirInfo.arrStop}</b> • ${tripDuration(trip)} min • <span class="badge ${trip.tipo.toLowerCase()}" style="padding:2px 6px;">${trip.tipo}</span></div>
     ${extras ? `<div class="trip-extra" style="margin-top:8px;">${extras}</div>` : ""}
+    ${trackingActive ? `<div style="margin-top:8px; font-size:11.5px; color:var(--text-dim);">Questa corsa resta fissata finché non arrivi o premi ✕.</div>` : ""}
   `;
 }
 
@@ -950,7 +1080,9 @@ document.getElementById("nextDay").onclick = ()=>{ state.viewedDate = addDays(st
 document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.onclick = ()=> setOverride(el.dataset.v); });
 
 setInterval(renderClockAndChip, 30000);
-renderAll(); loadOverride(); initMap(); fetchTUARss();
+loadActiveTrackingOnInit();
+renderAll(); loadOverride(); initMap(); fetchTUARss(); updateTrackButtonUI();
+if (trackingActive) requestWakeLock();
 </script>
 
 <script>
