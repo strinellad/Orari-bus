@@ -352,4 +352,989 @@ const demetrioFromAQ = [
   {p:"11:40", a:"12:09", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
   {p:"12:10", a:"12:27", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"12:20", a:"13:02", linea:"2001", tipo:"FS", nome:"Bominaco", giro:true},
-  {p:"13:10", a:"13:35", linea:"2058",
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FS", nome:"San Demetrio diretta"},
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FNS", nome:"San Demetrio diretta"},
+  {p:"13:20", a:"13:45", linea:"2058", tipo:"FS", nome:"San Demetrio diretta"},
+  {p:"13:37", a:"14:20", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", note:"passa dal Terminal"},
+  {p:"13:37", a:"14:20", linea:"2064", tipo:"FNS", nome:"San Demetrio-Tussillo", note:"parte dal Terminal", giro:true},
+  {p:"14:05", a:"14:28", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina", cartaceo:true},
+  {p:"14:10", a:"14:48", linea:"2001", tipo:"FA", nome:"Bominaco", giro:true},
+  {p:"16:40", a:"17:05", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"17:00", a:"17:21", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"19:00", a:"19:23", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"19:15", a:"19:55", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo", giro:true}
+];
+
+const demetrioToAQ = [
+  {p:"07:09", a:"07:50", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", giro:true},
+  {p:"07:11", a:"07:40", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli", offApp:true},
+  {p:"07:14", a:"07:42", linea:"2059", tipo:"FS", nome:"Secinaro-Goriano Valli"},
+  {p:"07:25", a:"07:50", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"07:31", a:"07:55", linea:"2005", tipo:"FA", nome:"Ateleta-Sulmona-Molina", cartaceo:true},
+  {p:"08:30", a:"08:55", linea:"2059", tipo:"FNS", nome:"Secinaro-Goriano Valli"},
+  {p:"08:40", a:"09:00", linea:"2064", tipo:"FS", nome:"San Demetrio-Tussillo", stopsAtCencioni:true},
+  {p:"09:45", a:"10:10", linea:"2001", tipo:"FA", nome:"Bominaco"},
+  {p:"09:58", a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"13:25", a:"13:50", linea:"2001", tipo:"FS", nome:"Bominaco"},
+  {p:"13:35", a:"14:00", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
+  {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
+  {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
+  {p:"17:10", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo", giro:true, note:"partenza 17:10 o 17:20 secondo fermata"},
+  {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"}
+];
+
+const ocreFromAQ = [
+  {p:"06:00", a:"06:21", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"06:45", a:"07:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:10", a:"08:31", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"solo sab", giorno:d=>d===6},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"lun–ven", giorno:d=>d>=1&&d<=5},
+  {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
+];
+
+const ocreToAQ = [
+  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"tranne mar", giorno:d=>d!==2},
+  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"martedì", giorno:d=>d===2},
+  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
+  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
+];
+
+const ROUTES = {
+  demetrio: {
+    label: "San Demetrio",
+    directions: {
+      fromAQ: { label: "L'Aquila ➔ San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+      toAQ:   { label: "San Demetrio ➔ L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ }
+    }
+  },
+  ocre: {
+    label: "San Panfilo d'Ocre",
+    directions: {
+      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Arrivo", trips: ocreFromAQ },
+      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Arrivo", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
+    }
+  }
+};
+
+const LINE_COLORS = {
+  "2001": "var(--line-2001)", "2005": "var(--line-2005)", "2008": "var(--line-2008)",
+  "2046": "var(--line-2046)", "2059": "var(--line-2059)", "2064": "var(--line-2064)", "2007": "var(--line-2007)",
+  "2058": "var(--line-2058)"
+};
+
+const SCHOOL_YEAR = { start: "2026-09-14", end: "2027-06-09" };
+const SCHOOL_BREAKS = [["2026-12-07","2026-12-07"], ["2026-12-23","2027-01-06"], ["2027-03-25","2027-03-30"]];
+const HOLIDAYS = ["2026-10-04","2026-11-01","2026-12-08","2026-12-25","2026-12-26","2027-01-01","2027-01-06","2027-03-28","2027-03-29","2027-04-25","2027-05-01","2027-06-02"];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function dateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// Apre la pagina di ricerca dell'app TUA (mycicero) per la tratta e direzione correnti,
+// usando come data/ora quella del giorno selezionato in app (oggi = adesso, altro giorno = ore 8:00).
+function openTuaSearch(){
+  const AQ = { text: "L'Aquila, Aquila, ITA", lat: 42.35055, lng: 13.39954 };
+  const DEST = state.route === "ocre"
+    ? { text: "San Panfilo d'Ocre, L'Aquila, ITA", lat: STOPS_COORDS.ocre.lat, lng: STOPS_COORDS.ocre.lng }
+    : { text: "San Demetrio ne' Vestini, L'Aquila, ITA", lat: 42.2880401, lng: 13.5581851 };
+
+  const start = state.dir === "fromAQ" ? AQ : DEST;
+  const end = state.dir === "fromAQ" ? DEST : AQ;
+
+  // Orario di ricerca: il sito TUA non mostra corse troppo prima o troppo dopo l'orario
+  // impostato, quindi ci posizioniamo circa 2 ore prima della corsa di riferimento
+  // (quella selezionata, o la prima valida del giorno se non ne hai scelta una).
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const info = getDayInfo(state.viewedDate);
+  let targetTimeStr = null;
+
+  if (state.selectedTripKey) {
+    const trip = dirInfo.trips.find(t => tripKey(t) === state.selectedTripKey);
+    if (trip) targetTimeStr = trip.p;
+  }
+  if (!targetTimeStr) {
+    const visible = tripsSorted(dirInfo.trips).filter(t => tripVisible(t, info));
+    if (visible.length) targetTimeStr = visible[0].p;
+  }
+
+  const viewed = state.viewedDate;
+  const now = new Date();
+  const isToday = dateStr(viewed) === dateStr(now);
+  let searchDate;
+
+  if (targetTimeStr) {
+    const [hh, mm] = targetTimeStr.split(":").map(Number);
+    const target = new Date(viewed.getFullYear(), viewed.getMonth(), viewed.getDate(), hh, mm, 0);
+    searchDate = new Date(target.getTime() - 2 * 60 * 60 * 1000); // 2 ore prima
+    if (isToday && searchDate < now) searchDate = now; // oggi non ha senso cercare nel passato
+  } else {
+    // Nessuna corsa nota per quel giorno/direzione: fallback ragionevole
+    searchDate = isToday ? now : new Date(viewed.getFullYear(), viewed.getMonth(), viewed.getDate(), 6, 0, 0);
+  }
+
+  const params = new URLSearchParams({
+    a: "1", c: "0", w: "0", t: "3,15", aw: "0",
+    d: String(searchDate.getTime()),
+    st: start.text, sa: start.text, slat: start.lat, slng: start.lng,
+    et: end.text, ea: end.text, elat: end.lat, elng: end.lng
+  });
+
+  window.open(`https://tua.mycicero.it/TPWebPortal/it/solutions?${params.toString()}`, "_blank");
+}
+function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
+
+let scolasticoOverride = null;
+
+function getDayInfo(date){
+  const ds = dateStr(date);
+  const dow = date.getDay();
+  const isHoliday = dow===0 || HOLIDAYS.includes(ds);
+  let isScolastico = false;
+  if(!isHoliday){
+    if(scolasticoOverride !== null) isScolastico = scolasticoOverride;
+    else {
+      const inYear = ds>=SCHOOL_YEAR.start && ds<=SCHOOL_YEAR.end;
+      const inBreak = SCHOOL_BREAKS.some(([s,e])=> ds>=s && ds<=e);
+      isScolastico = inYear && !inBreak;
+    }
+  }
+  return {ds, dow, isHoliday, isScolastico};
+}
+
+function loadScolasticoOverride(){
+  try {
+    const r = localStorage.getItem('scolastico-override');
+    if(r) scolasticoOverride = r==="si" ? true : (r==="no" ? false : null);
+  } catch(e){}
+}
+
+function setOverride(v){
+  scolasticoOverride = v==="si" ? true : (v==="no" ? false : null);
+  renderCalBar(); renderAll();
+  try { localStorage.setItem('scolastico-override', v); } catch(e){}
+}
+
+function renderCalBar(){
+  const bar = document.getElementById("calBar");
+  const cur = scolasticoOverride===true ? "si" : (scolasticoOverride===false ? "no" : "auto");
+  bar.querySelectorAll(".calopt").forEach(el=>{ el.classList.toggle("active", el.dataset.v===cur); });
+}
+
+function tripVisible(trip, dayInfo){
+  if(dayInfo.isHoliday) return false;
+  let base = trip.tipo==="FA" ? true : (trip.tipo==="FS" ? dayInfo.isScolastico : !dayInfo.isScolastico);
+  if(!base) return false;
+  return trip.giorno ? trip.giorno(dayInfo.dow) : true;
+}
+
+let state = { route: "ocre", dir: "fromAQ", viewedDate: new Date(), selectedTripKey: null };
+const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+
+/* MAPPA & TRACCIAMENTO STRADALE CON MEMORIA */
+
+// Coordinate dei checkpoint della tratta San Demetrio (fornite dall'utente).
+// NB: "Villa Sant'Angelo" è citata nei percorsi ma non è ancora arrivata una coordinata:
+// finché non la fornisci, il tratto Tussillo-Forno viene calcolato diretto via strada (OSRM),
+// che comunque passa realisticamente vicino a Villa Sant'Angelo.
+const DEMETRIO_CP = {
+  terminal:      { name: "Terminal Collemaggio",        lat: 42.3444,     lng: 13.4009 },
+  cencioni:      { name: "Piazzale Cencioni",           lat: 42.351438,   lng: 13.411938 },
+  bivio_sr5:     { name: "Bivio SR5bis",                lat: 42.3392207,  lng: 13.4093285 },
+  bivio_selia:   { name: "Bivio Sant'Elia",             lat: 42.3373686,  lng: 13.4164779 },
+  bazzano1:      { name: "Bazzano 1",                   lat: 42.3367825,  lng: 13.4531896 },
+  bazzano2:      { name: "Bazzano 2",                   lat: 42.3368447,  lng: 13.4581014 },
+  paganica:      { name: "Stazione Paganica",           lat: 42.335188,   lng: 13.464688 },
+  onna:          { name: "Onna",                        lat: 42.3313742,  lng: 13.4781801 },
+  sangregorio:   { name: "San Gregorio",                lat: 42.3262801,  lng: 13.4953234 },
+  bivio_eusanio: { name: "Bivio Sant'Eusanio",          lat: 42.2959988,  lng: 13.5345279 },
+  santeusanio:   { name: "Sant'Eusanio Forconese",      lat: 42.289409,   lng: 13.523999 },
+  casentino:     { name: "Casentino",                   lat: 42.282754,   lng: 13.513502 },
+  tussillo:      { name: "Tussillo",                    lat: 42.268167,   lng: 13.532477 },
+  stiffe:        { name: "Stiffe",                      lat: 42.256585,   lng: 13.547842 },
+  stazionesd:    { name: "Stazione San Demetrio",       lat: 42.2947613,  lng: 13.5374076 },
+  paolo:         { name: "Paolobus San Demetrio",       lat: 42.290377,   lng: 13.547565 },
+  forno:         { name: "Forno San Demetrio",          lat: 42.2886153,  lng: 13.5526543 },
+  ufficiopostale:{ name: "Ufficio Postale San Demetrio",lat: 42.2905166,  lng: 13.5583944 }
+};
+
+// Percorso (sequenza di checkpoint) per ciascuna linea/direzione, come indicato dall'utente.
+// "_giro" = variante lunga via Sant'Eusanio-Casentino-Tussillo-Stiffe (corse con giro:true).
+// "toAQ_cencioni" = variante di ritorno che si ferma a Cencioni invece che al Terminal.
+const DEMETRIO_ROUTES = {
+  "2059": {
+    fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","bazzano2","cencioni","terminal"]
+  },
+  "2058": {
+    fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"]
+    // Nessuna corsa di ritorno nota per questa linea.
+  },
+  "2064": {
+    fromAQ:       ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    fromAQ_giro:  ["terminal","cencioni","paganica","onna","sangregorio","bivio_eusanio","santeusanio","casentino","tussillo","stiffe","tussillo","forno","ufficiopostale"],
+    toAQ:          ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"],
+    toAQ_cencioni: ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni"]
+  },
+  "2046": {
+    fromAQ: ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"]
+  },
+  "2005": {
+    fromAQ: ["terminal","bivio_sr5","bivio_selia","bazzano1","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","bazzano1","bivio_selia","bivio_sr5","terminal"]
+  },
+  "2001": {
+    fromAQ:      ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    fromAQ_giro: ["terminal","paganica","onna","sangregorio","bivio_eusanio","santeusanio","casentino","tussillo","stiffe","tussillo","forno","ufficiopostale"],
+    toAQ:        ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"]
+  }
+  // "2008": nessun percorso dettagliato fornito -> fallback al tragitto diretto via strada.
+};
+
+function getDemetrioRouteKeys(linea, dir, trip) {
+  const lineRoutes = DEMETRIO_ROUTES[linea];
+  if (!lineRoutes) return null;
+  if (dir === "fromAQ") {
+    if (trip && trip.giro && lineRoutes.fromAQ_giro) return lineRoutes.fromAQ_giro;
+    return lineRoutes.fromAQ || null;
+  } else {
+    if (trip && trip.stopsAtCencioni && lineRoutes.toAQ_cencioni) return lineRoutes.toAQ_cencioni;
+    return lineRoutes.toAQ || null;
+  }
+}
+
+let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
+let fullRoutePolyline = null, passedPolyline = null, cpMarkers = [];
+let osrmFullCoords = [];   // Punti geodetichi completi da OSRM
+let routeCumDist = [];     // Distanza cumulativa (metri) lungo osrmFullCoords, stesso indice
+let secondToLastRouteIdx = null; // Indice sul tracciato del penultimo checkpoint (quello prima dell'arrivo)
+let lastPassedCPIndex = -1; // usato solo per i checkpoint etichettati
+let lastCutIndex = 0;       // indice sul tracciato OSRM fino a cui colorare di verde (avanzamento continuo)
+let stopAlertTriggered = false;
+let trackingActive = false; // true quando l'utente ha fissato una corsa e attivato l'alert
+let wakeLockRef = null;
+
+const ALERT_DISTANCE_METERS = 200;      // soglia di prossimità diretta alla fermata di arrivo
+const AFTER_PENULTIMATE_MARGIN = 250;   // metri percorsi oltre il penultimo checkpoint prima di avvisare
+const ARRIVED_DISTANCE_METERS = 60;     // sotto questa distanza si considera "arrivato" e si ferma il tracking
+
+function createDivIcon(className, text) {
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+}
+
+function createTimeIcon(className, text) {
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-time ${className}">${text}</div>`, iconSize: [46, 26], iconAnchor: [23, 13] });
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  updateMapMarkers();
+  startContinuousTracking(); // Tracciamento automatico all'apertura
+}
+
+function selectedOrNextTrip() {
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  if (state.selectedTripKey) {
+    const t = dirInfo.trips.find(t => tripKey(t) === state.selectedTripKey);
+    if (t) return t;
+  }
+  const found = findNextDeparture();
+  return found ? found.trip : null;
+}
+
+function currentViaPoints() {
+  // Restituisce l'elenco di via-points (checkpoint) nell'ordine di marcia corrente, oppure null
+  // se per la tratta/linea/corsa selezionata non ne abbiamo di definiti (in tal caso si traccia
+  // solo il percorso diretto partenza-arrivo via strada).
+  if (state.route === "ocre") {
+    return state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+  }
+  if (state.route === "demetrio") {
+    const trip = selectedOrNextTrip();
+    if (!trip) return null;
+    const keys = getDemetrioRouteKeys(trip.linea, state.dir, trip);
+    if (!keys) return null;
+    return keys.map((k, idx) => {
+      const cp = DEMETRIO_CP[k];
+      return { id: idx, name: cp.name, lat: cp.lat, lng: cp.lng };
+    });
+  }
+  return null;
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
+  const pf = document.getElementById('progressFill'); if (pf) pf.style.width = "0%";
+  const pl = document.getElementById('progressLabel'); if (pl) pl.textContent = "Percorso: 0%";
+
+  const { dep, arr } = getRouteCoords();
+  document.getElementById('mapTitle').textContent = `🗺️ ${dep.shortLabel || dep.label} ➔ ${arr.shortLabel || arr.label}`;
+
+  const trip = selectedOrNextTrip();
+  const depTimeLabel = trip ? trip.p : "P";
+  const arrTimeLabel = trip ? trip.a : "A";
+
+  if (depMarker) { depMarker.setLatLng([dep.lat, dep.lng]); depMarker.setIcon(createTimeIcon('pin-dep', depTimeLabel)); }
+  else depMarker = L.marker([dep.lat, dep.lng], { icon: createTimeIcon('pin-dep', depTimeLabel) }).addTo(map);
+  depMarker.bindPopup(`<b>Partenza ${depTimeLabel}:</b><br>${dep.label}`);
+
+  if (arrMarker) { arrMarker.setLatLng([arr.lat, arr.lng]); arrMarker.setIcon(createTimeIcon('pin-arr', arrTimeLabel)); }
+  else arrMarker = L.marker([arr.lat, arr.lng], { icon: createTimeIcon('pin-arr', arrTimeLabel) }).addTo(map);
+  arrMarker.bindPopup(`<b>Arrivo ${arrTimeLabel}:</b><br>${arr.label}`);
+
+  redrawCpMarkers();
+  fetchOSRMRoute(); // chiamata di rete: solo qui, al cambio di corsa/tratta/direzione
+
+  if (!trackingActive) fitMapBounds();
+}
+
+// Ridisegna solo i marcatori dei checkpoint (nessuna chiamata di rete): sicuro da richiamare
+// spesso, ad esempio ogni volta che si supera un checkpoint durante il tracking.
+function redrawCpMarkers() {
+  cpMarkers.forEach(m => map.removeLayer(m));
+  cpMarkers = [];
+  const viaPoints = currentViaPoints();
+  if (viaPoints) {
+    const lastIdx = viaPoints.length - 1;
+    viaPoints.forEach((cp, idx) => {
+      if (idx === 0 || idx === lastIdx) return; // salta partenza/arrivo, già marcati sopra
+      const passedClass = idx <= lastPassedCPIndex ? 'passed' : '';
+      const m = L.marker([cp.lat, cp.lng], {
+        icon: createDivIcon(`pin-cp ${passedClass}`, cp.id ?? idx)
+      }).bindPopup(`<b>Checkpoint:</b> ${cp.name}`).addTo(map);
+      cpMarkers.push(m);
+    });
+  }
+}
+
+async function fetchOSRMRoute() {
+  try {
+    const { dep, arr } = getRouteCoords();
+    const viaPoints = currentViaPoints();
+    const coordsList = viaPoints
+      ? viaPoints.map(cp => `${cp.lng},${cp.lat}`)
+      : [`${dep.lng},${dep.lat}`, `${arr.lng},${arr.lat}`];
+    const coordsStr = coordsList.join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.routes && data.routes.length > 0) {
+      osrmFullCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      computeCumulativeDistances();
+      computeViaPointIndices(viaPoints);
+      redrawRoutePolylines();
+    }
+  } catch(e) {
+    console.log("Errore OSRM Route:", e);
+  }
+}
+
+function computeCumulativeDistances() {
+  routeCumDist = [0];
+  for (let i = 1; i < osrmFullCoords.length; i++) {
+    const d = getDistanceMeters(osrmFullCoords[i-1][0], osrmFullCoords[i-1][1], osrmFullCoords[i][0], osrmFullCoords[i][1]);
+    routeCumDist.push(routeCumDist[i-1] + d);
+  }
+}
+
+// Calcola, per ogni checkpoint del percorso, l'indice del punto più vicino sul tracciato OSRM.
+// La ricerca è sequenziale (ogni checkpoint cercato solo DOPO il precedente sul tracciato):
+// evita ambiguità quando due fermate sono ravvicinate o quando il percorso si ripiega su se
+// stesso (es. Tussillo-Stiffe-Tussillo), casi in cui una ricerca "più vicino in assoluto"
+// potrebbe agganciarsi al punto sbagliato.
+let viaPointRouteIdx = []; // [{cp, idx}] in ordine di marcia
+
+function computeViaPointIndices(viaPoints) {
+  viaPointRouteIdx = [];
+  secondToLastRouteIdx = null;
+  if (!viaPoints || viaPoints.length === 0 || osrmFullCoords.length === 0) return;
+  let searchFrom = 0;
+  viaPoints.forEach(cp => {
+    const idx = nearestRouteIndexInRange(cp.lat, cp.lng, searchFrom, osrmFullCoords.length - 1, Infinity);
+    if (idx !== null) {
+      viaPointRouteIdx.push({ cp, idx });
+      searchFrom = idx; // il checkpoint successivo va cercato solo più avanti sul tracciato
+    }
+  });
+  if (viaPointRouteIdx.length >= 2) {
+    secondToLastRouteIdx = viaPointRouteIdx[viaPointRouteIdx.length - 2].idx;
+  }
+}
+
+function redrawRoutePolylines() {
+  if (!map || osrmFullCoords.length === 0) return;
+
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
+
+  const cutIndex = Math.min(lastCutIndex, osrmFullCoords.length - 1);
+
+  if (cutIndex > 0) {
+    const passedCoords = osrmFullCoords.slice(0, cutIndex + 1);
+    passedPolyline = L.polyline(passedCoords, { color: '#4fa88f', weight: 5, opacity: 0.9 }).addTo(map);
+  }
+
+  const remainingCoords = osrmFullCoords.slice(cutIndex);
+  fullRoutePolyline = L.polyline(remainingCoords, { color: '#3b82f6', weight: 5, opacity: 0.9 }).addTo(map);
+
+  updateProgressBar(cutIndex);
+}
+
+function updateProgressBar(cutIndex) {
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  if (!fill) return;
+  const total = routeCumDist.length ? routeCumDist[routeCumDist.length - 1] : 0;
+  if (!total) { fill.style.width = "0%"; if (label) label.textContent = "Percorso: 0%"; return; }
+  const pct = Math.max(0, Math.min(100, (routeCumDist[Math.min(cutIndex, routeCumDist.length - 1)] / total) * 100));
+  fill.style.width = `${pct}%`;
+  if (label) label.textContent = `Percorso: ${Math.round(pct)}%`;
+}
+
+// Cerca il punto del tracciato più vicino a una coordinata, SOLO nell'intervallo [fromIdx, toIdx].
+function nearestRouteIndexInRange(lat, lng, fromIdx, toIdx, maxDist) {
+  if (osrmFullCoords.length === 0) return null;
+  let minD = Infinity, minI = -1;
+  const start = Math.max(0, fromIdx), end = Math.min(toIdx, osrmFullCoords.length - 1);
+  for (let i = start; i <= end; i++) {
+    const d = getDistanceMeters(lat, lng, osrmFullCoords[i][0], osrmFullCoords[i][1]);
+    if (d < minD) { minD = d; minI = i; }
+  }
+  return minD <= maxDist ? minI : null;
+}
+
+// Posizione GPS live: cerca solo in una finestra intorno al punto già raggiunto, per non
+// "saltare" erroneamente su un punto geograficamente vicino ma in realtà più avanti/indietro
+// sul tracciato (stesso motivo dei percorsi che si ripiegano su se stessi).
+function nearestRouteIndex(lat, lng, maxDist = 450) {
+  const from = Math.max(0, lastCutIndex - 25);
+  return nearestRouteIndexInRange(lat, lng, from, osrmFullCoords.length - 1, maxDist);
+}
+
+function getRouteCoords() {
+  let dep, arr;
+  if (state.route === "ocre") {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.ocre : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.ocre;
+  } else {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.demetrio : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.demetrio;
+
+    // Alcune corse di ritorno (es. 2064 delle 8:40) non arrivano al Terminal:
+    // l'arrivo reale, sia per la mappa che per l'alert di prossimità, è Cencioni.
+    if (state.dir === "toAQ") {
+      const trip = selectedOrNextTrip();
+      if (trip && trip.stopsAtCencioni) {
+        arr = { lat: DEMETRIO_CP.cencioni.lat, lng: DEMETRIO_CP.cencioni.lng, label: "Cencioni (cimitero)", shortLabel: "Cencioni" };
+      }
+    }
+  }
+  return { dep, arr };
+}
+
+function fitMapBounds() {
+  if (!map) return;
+  const points = [];
+  if (depMarker) points.push(depMarker.getLatLng());
+  if (arrMarker) points.push(arrMarker.getLatLng());
+  if (userMarker) points.push(userMarker.getLatLng());
+  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
+}
+
+function getDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const f1 = lat1 * Math.PI/180, f2 = lat2 * Math.PI/180;
+  const df = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(df/2)*Math.sin(df/2) + Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)*Math.sin(dl/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function startContinuousTracking() {
+  if (!navigator.geolocation) return;
+  if (watchGpsId !== null) navigator.geolocation.clearWatch(watchGpsId);
+
+  watchGpsId = navigator.geolocation.watchPosition(
+    updateUserLocation,
+    err => {
+      const badge = document.getElementById('locStatusBadge');
+      badge.textContent = "GPS Disattivato";
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+  );
+}
+
+function updateUserLocation(pos) {
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+  const userCoords = [lat, lng];
+
+  if (userMarker) userMarker.setLatLng(userCoords);
+  else {
+    userMarker = L.marker(userCoords, {
+      icon: L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-user"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] })
+    }).bindPopup("<b>La tua Posizione</b>").addTo(map);
+  }
+
+  const badge = document.getElementById('locStatusBadge');
+  badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
+  badge.style.color = "var(--green)";
+
+  // Avanzamento continuo lungo il tracciato stradale (funziona per qualsiasi tratta, con o senza checkpoint)
+  const nearIdx = nearestRouteIndex(lat, lng);
+  if (nearIdx !== null && nearIdx > lastCutIndex) {
+    lastCutIndex = nearIdx;
+    redrawRoutePolylines();
+  }
+
+  // Autozoom "da navigatore": durante il tracking, la mappa segue tenendo d'occhio
+  // l'ultima fermata passata, la tua posizione e le prossime 2-3 fermate.
+  if (trackingActive) updateNavigatorView(userCoords);
+
+  // Aggiorna lo stato "passato" dei checkpoint etichettati, se presenti per questa tratta/linea
+  const viaPoints = currentViaPoints();
+  if (viaPoints) {
+    viaPoints.forEach((cp, idx) => {
+      if (idx === 0 || idx === viaPoints.length - 1) return;
+      const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
+      if (dist < 200 && idx > lastPassedCPIndex) {
+        lastPassedCPIndex = idx;
+        redrawCpMarkers();
+      }
+    });
+  }
+
+  const { arr } = getRouteCoords();
+  const distToArr = getDistanceMeters(lat, lng, arr.lat, arr.lng);
+
+  // Arrivo rilevato: se il tracking è attivo, si ferma da solo
+  if (trackingActive && distToArr < ARRIVED_DISTANCE_METERS) {
+    stopTracking(false);
+    return;
+  }
+
+  if (!stopAlertTriggered) {
+    // 1) Prossimità diretta alla fermata di arrivo
+    if (distToArr < ALERT_DISTANCE_METERS) {
+      triggerStopNotification(arr.label, "vicino");
+    }
+    // 2) La penultima fermata è già stata superata da un po': la prossima è la tua
+    else if (secondToLastRouteIdx !== null && lastCutIndex >= secondToLastRouteIdx) {
+      const cur = routeCumDist[Math.min(lastCutIndex, routeCumDist.length - 1)] || 0;
+      const atPenultimate = routeCumDist[Math.min(secondToLastRouteIdx, routeCumDist.length - 1)] || 0;
+      const totalLastLeg = (routeCumDist[routeCumDist.length - 1] || 0) - atPenultimate;
+      // Se le ultime due fermate sono ravvicinate, il margine non deve superare metà del tragitto residuo:
+      // altrimenti rischieremmo di "saltare" l'avviso perché si arriva prima di raggiungere il margine fisso.
+      const effectiveMargin = Math.min(AFTER_PENULTIMATE_MARGIN, totalLastLeg * 0.5);
+      if ((cur - atPenultimate) >= effectiveMargin) {
+        triggerStopNotification(arr.label, "penultima");
+      }
+    }
+  }
+}
+
+let stopAlertVibrateInterval = null;
+
+let lastNavigatorFitAt = 0;
+
+// Inquadra la mappa come un navigatore: ultima fermata passata, posizione attuale e prossime 2-3 fermate.
+function updateNavigatorView(userCoords) {
+  if (!map) return;
+
+  const now = Date.now();
+  if (now - lastNavigatorFitAt < 4000) return; // non troppo spesso, per fluidità
+  lastNavigatorFitAt = now;
+
+  const points = [userCoords];
+
+  if (viaPointRouteIdx.length > 0) {
+    let lastPassed = null, upcoming = [];
+    viaPointRouteIdx.forEach(v => {
+      if (v.idx <= lastCutIndex) lastPassed = v;
+      else if (upcoming.length < 3) upcoming.push(v);
+    });
+    if (lastPassed) points.push([lastPassed.cp.lat, lastPassed.cp.lng]);
+    upcoming.forEach(v => points.push([v.cp.lat, v.cp.lng]));
+  } else {
+    // Nessun checkpoint per questa linea: inquadra almeno utente e arrivo
+    const { arr } = getRouteCoords();
+    points.push([arr.lat, arr.lng]);
+  }
+
+  if (points.length < 2) {
+    map.flyTo(userCoords, 15, { duration: 1 });
+    return;
+  }
+
+  map.flyToBounds(L.latLngBounds(points), { padding: [50, 50], maxZoom: 16, duration: 1 });
+}
+
+function triggerStopNotification(stopLabel, reason) {
+  stopAlertTriggered = true;
+
+  const title = "🔔 RICHIEDI FERMATA!";
+  const msg = reason === "penultima"
+    ? `Hai già superato la fermata precedente da un po': la prossima è ${stopLabel}. Premi il pulsante prenotazione!`
+    : `Il bus si sta avvicinando a ${stopLabel} (meno di ${ALERT_DISTANCE_METERS}m). Premi il pulsante prenotazione!`;
+
+  // Overlay a schermo intero, lampeggiante, con segnale di stop
+  document.getElementById('stopAlertText').textContent = msg;
+  document.getElementById('stopAlertOverlay').classList.add('show');
+
+  // Vibrazione: scatta subito e si ripete finché non viene chiusa
+  if ("vibrate" in navigator) {
+    navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
+    if (stopAlertVibrateInterval) clearInterval(stopAlertVibrateInterval);
+    stopAlertVibrateInterval = setInterval(() => navigator.vibrate([1000, 250, 1000]), 3000);
+  }
+
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, {
+      body: msg,
+      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+      vibrate: [1000, 250, 1000, 250, 1000]
+    });
+  }
+}
+
+function dismissStopAlert() {
+  document.getElementById('stopAlertOverlay').classList.remove('show');
+  if (stopAlertVibrateInterval) { clearInterval(stopAlertVibrateInterval); stopAlertVibrateInterval = null; }
+  if ("vibrate" in navigator) navigator.vibrate(0);
+}
+
+/* TRACKING PERSISTENTE (corsa fissata in primo piano) */
+
+function saveActiveTracking() {
+  try {
+    localStorage.setItem('activeTracking', JSON.stringify({
+      route: state.route, dir: state.dir, tripKey: state.selectedTripKey
+    }));
+  } catch(e) {}
+}
+
+function clearActiveTracking() {
+  try { localStorage.removeItem('activeTracking'); } catch(e) {}
+}
+
+function loadActiveTrackingOnInit() {
+  try {
+    const raw = localStorage.getItem('activeTracking');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && data.route && ROUTES[data.route]) {
+      state.route = data.route;
+      state.dir = data.dir || "fromAQ";
+      state.selectedTripKey = data.tripKey || null;
+      trackingActive = true;
+    }
+  } catch(e) {}
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      wakeLockRef.addEventListener('release', () => { wakeLockRef = null; });
+    }
+  } catch(e) { console.log("Wake Lock non disponibile:", e); }
+}
+
+function releaseWakeLock() {
+  if (wakeLockRef) { wakeLockRef.release().catch(()=>{}); wakeLockRef = null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (trackingActive && document.visibilityState === 'visible' && wakeLockRef === null) {
+    requestWakeLock();
+  }
+});
+
+function updateTrackButtonUI() {
+  const btn = document.getElementById('trackBtn');
+  if (!btn) return;
+  btn.textContent = trackingActive ? "⏹ Ferma tracking" : "🔔 Attiva Alert";
+  btn.classList.toggle("tracking", trackingActive);
+}
+
+function toggleTracking() {
+  if (trackingActive) { stopTracking(true); return; }
+
+  if (!state.selectedTripKey) {
+    const found = findNextDeparture();
+    if (found) state.selectedTripKey = tripKey(found.trip);
+  }
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
+  trackingActive = true;
+  stopAlertTriggered = false;
+  saveActiveTracking();
+  requestWakeLock();
+  renderTripList(); renderSelectedCard(); updateTrackButtonUI();
+}
+
+function stopTracking(manual) {
+  trackingActive = false;
+  clearActiveTracking();
+  releaseWakeLock();
+  updateTrackButtonUI();
+  renderTripList(); renderSelectedCard();
+  if (map) fitMapBounds();
+  if (!manual) {
+    alert("🎉 Sei arrivato a destinazione! Il tracking si è fermato automaticamente.");
+  }
+}
+
+let rssItems = [];
+let currentRssIndex = 0;
+let rssInterval = null;
+
+async function fetchTUARss() {
+  try {
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tuabruzzo.it/rss.xml')}`);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items && data.items.length > 0) {
+      const keywords = ['aquila', 'laquila', 'demetrio', 'ocre', 'bominaco', '2001', '2005', '2008', '2046', '2059', '2064', '2007', 'rocca di mezzo', 'tussillo', 'secinaro'];
+      
+      let filtered = data.items.filter(item => {
+        const text = (item.title + " " + item.description).toLowerCase();
+        return keywords.some(kw => text.includes(kw));
+      });
+
+      rssItems = filtered.length > 0 ? filtered : data.items.slice(0, 5);
+
+      if (rssItems.length > 0) {
+        document.getElementById('rssBanner').style.display = 'block';
+        showRssItem(0);
+        if (rssItems.length > 1) startRssCarousel();
+      }
+    }
+  } catch(e) {
+    console.log("Errore RSS Feed TUA:", e);
+  }
+}
+
+function showRssItem(index) {
+  const box = document.getElementById('rssContentBox');
+  if (!box || !rssItems[index]) return;
+  
+  box.classList.add('fade-out');
+  setTimeout(() => {
+    const item = rssItems[index];
+    document.getElementById('rssItemTitle').textContent = item.title;
+    document.getElementById('rssItemDesc').textContent = item.description.replace(/<[^>]*>?/gm, '').substring(0, 110) + '...';
+    box.classList.remove('fade-out');
+  }, 400);
+}
+
+function startRssCarousel() {
+  if (rssInterval) clearInterval(rssInterval);
+  rssInterval = setInterval(() => {
+    currentRssIndex = (currentRssIndex + 1) % rssItems.length;
+    showRssItem(currentRssIndex);
+  }, 5000);
+}
+
+function renderTabs(){
+  const routeTabs = document.getElementById("routeTabs"); routeTabs.innerHTML = "";
+  Object.entries(ROUTES).forEach(([key,r])=>{
+    const el = document.createElement("div");
+    el.className = "tab" + (state.route===key ? " active":""); el.textContent = r.label;
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    routeTabs.appendChild(el);
+  });
+
+  const dirTabs = document.getElementById("dirTabs"); dirTabs.innerHTML = "";
+  Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
+    const el = document.createElement("div");
+    el.className = "dirbtn" + (state.dir===key ? " active":""); el.textContent = d.label;
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    dirTabs.appendChild(el);
+  });
+}
+
+function renderClockAndChip(){
+  const now = new Date();
+  document.getElementById("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const info = getDayInfo(state.viewedDate);
+  const chip = document.getElementById("daychip");
+  chip.className = "daychip " + (info.isHoliday ? "festivo" : (info.isScolastico ? "scolastico" : "nonscolastico"));
+  document.getElementById("daychipText").innerHTML = `<b>${(dateStr(state.viewedDate)===dateStr(now)?"oggi, ":"")+WD[info.dow]} ${state.viewedDate.getDate()}</b> — ` + (info.isHoliday?"festivo":(info.isScolastico?"scolastico":"feriale, no scuola"));
+}
+
+function tripDuration(trip){ return toMinutes(trip.a)-toMinutes(trip.p); }
+function tripKey(trip){ return `${trip.linea}|${trip.p}|${trip.a}|${trip.tipo}|${trip.nome}`; }
+
+function tripExtrasHtml(trip){
+  let extras = "";
+  if(trip.stopsAtCencioni) extras += `<span class="xbadge arrto">🏁 ARRIVA A CENCIONI, NON AL TERMINAL</span>`;
+  if(trip.giro) extras += `<span class="xbadge giro">⚠️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
+  if(trip.cartaceo) extras += `<span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span>`;
+  if(trip.offApp) extras += `<span class="xbadge offapp">🚫 NON SU APP TUA</span>`;
+  if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
+  return extras;
+}
+
+// Restituisce la fermata di arrivo reale per la corsa: alcune corse (es. 2064 delle 8:40)
+// non arrivano fino al Terminal ma si fermano prima, a Cencioni (zona cimitero).
+function tripArrStopLabel(trip, dirInfo){
+  if(trip && trip.stopsAtCencioni) return `<span style="color:var(--danger); font-weight:700;">Piazzale Cencioni (cimitero) — NON il Terminal!</span>`;
+  return dirInfo.arrStop;
+}
+
+// A parità di orario di partenza, priorità alla corsa che arriva prima (orario di arrivo più basso).
+function tripsSorted(trips){
+  return [...trips].sort((a,b)=> toMinutes(a.p)-toMinutes(b.p) || toMinutes(a.a)-toMinutes(b.a));
+}
+
+function findNextDeparture(){
+  const trips = tripsSorted(ROUTES[state.route].directions[state.dir].trips);
+  const now = new Date();
+  for(let d=0; d<14; d++){
+    const date = addDays(now, d); const info = getDayInfo(date);
+    if(info.isHoliday) continue;
+    for(const trip of trips){
+      if(!tripVisible(trip, info)) continue;
+      const dep = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ...trip.p.split(":").map(Number));
+      if(d===0 && dep<=now) continue;
+      return {trip, date, dep};
+    }
+  }
+  return null;
+}
+
+function renderNextCard(){
+  const card = document.getElementById("nextCard");
+  const found = findNextDeparture();
+  if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa nei prossimi giorni.</div>`; return; }
+  const {trip, date, dep} = found; const now = new Date();
+  const diffMin = Math.round((dep-now)/60000);
+  const when = dateStr(date)===dateStr(now) ? (diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`) : `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  card.innerHTML = `
+    <div class="next-label">PROSSIMA CORSA IN PARTENZA</div>
+    <div class="next-main">
+      <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+    </div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b></div>
+    <div class="next-when">⏱️ Partenza ${when}</div>
+  `;
+}
+
+function renderTripList(){
+  const container = document.getElementById("tripList"); container.innerHTML = "";
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const trips = tripsSorted(dirInfo.trips);
+  const info = getDayInfo(state.viewedDate);
+
+  if(info.isHoliday){ container.innerHTML = `<div style="padding:14px; text-align:center; color:var(--text-dim);">Nessuna corsa attiva nei giorni festivi.</div>`; return; }
+
+  const now = new Date();
+  trips.forEach(trip => {
+    if(!tripVisible(trip, info)) return;
+    const isPassed = dateStr(state.viewedDate)===dateStr(now) && toMinutes(trip.p) < (now.getHours()*60+now.getMinutes());
+    const key = tripKey(trip);
+    const el = document.createElement("div");
+    el.className = "trip" + (isPassed ? " passed" : "") + (state.selectedTripKey===key ? " selected" : "");
+    const extras = tripExtrasHtml(trip);
+    el.innerHTML = `
+      <div class="roundel-sm" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
+      <div class="trip-meta">
+        <div class="trip-meta-title">${trip.nome} <span style="color:var(--text-dim); font-weight:400;">(${tripDuration(trip)}m)</span></div>
+        <div class="trip-meta-sub">Da ${dirInfo.depStop} a ${tripArrStopLabel(trip, dirInfo)}</div>
+        ${extras ? `<div class="trip-extra">${extras}</div>` : ""}
+      </div>
+      <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
+    `;
+    el.onclick = ()=>{
+      if(trackingActive && state.selectedTripKey===key){ stopTracking(true); }
+      state.selectedTripKey = (state.selectedTripKey===key ? null : key);
+      renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();
+    };
+    container.appendChild(el);
+  });
+}
+
+function renderSelectedCard(){
+  const card = document.getElementById("selectedCard");
+  if(!state.selectedTripKey){ card.style.display = "none"; card.innerHTML = ""; return; }
+
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const trip = dirInfo.trips.find(t => tripKey(t)===state.selectedTripKey);
+  if(!trip){ card.style.display = "none"; state.selectedTripKey = null; return; }
+
+  const extras = tripExtrasHtml(trip);
+
+  card.style.display = "block";
+  card.style.borderColor = trackingActive ? "var(--danger)" : "var(--amber)";
+  card.innerHTML = `
+    <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
+    <div class="selected-label" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</div>
+    <div class="next-main">
+      <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+    </div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b> • ${tripDuration(trip)} min • <span class="badge ${trip.tipo.toLowerCase()}" style="padding:2px 6px;">${trip.tipo}</span></div>
+    ${extras ? `<div class="trip-extra" style="margin-top:8px;">${extras}</div>` : ""}
+    ${trackingActive ? `<div style="margin-top:8px; font-size:11.5px; color:var(--text-dim);">Questa corsa resta fissata finché non arrivi o premi ✕.</div>` : ""}
+  `;
+}
+
+function renderAll(){
+  renderTabs(); renderClockAndChip(); renderNextCard(); renderTripList(); renderSelectedCard();
+  document.getElementById("dateLabel").textContent = dateStr(state.viewedDate)===dateStr(new Date()) ? "oggi" : `${state.viewedDate.getDate()} ${MO[state.viewedDate.getMonth()]}`;
+}
+
+document.getElementById("prevDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, -1); renderAll(); };
+document.getElementById("nextDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, 1); renderAll(); };
+document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.onclick = ()=> setOverride(el.dataset.v); });
+
+setInterval(renderClockAndChip, 30000);
+loadActiveTrackingOnInit();
+loadScolasticoOverride();
+renderCalBar();
+renderAll(); initMap(); fetchTUARss(); updateTrackButtonUI();
+if (trackingActive) requestWakeLock();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
+
