@@ -167,8 +167,11 @@
   .map-pin { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: #000; box-shadow: 0 3px 8px rgba(0,0,0,0.6); border: 2px solid #ffffff; }
   .pin-dep { background: var(--amber); }
   .pin-arr { background: var(--green); color: #fff; }
-  .pin-time { width:auto; height:auto; border-radius: 20px; padding: 4px 9px; white-space:nowrap; font-size: 11px; }
   .pin-cp { width: 18px; height: 18px; background: var(--surface-2); border: 2px solid var(--amber); color: var(--amber); font-size: 9px; }
+  .stop-tooltip{ background: rgba(18,24,31,0.94); color:#fff; border: 1px solid rgba(255,255,255,0.18); border-radius: 7px; padding: 3px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.45); }
+  .stop-tooltip::before{ display:none; }
+  .stop-tooltip-dep{ color: var(--amber); }
+  .stop-tooltip-arr{ color: var(--green); }
   .pin-cp.passed { background: var(--green); border-color: #fff; color: #fff; }
   .pin-user { width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px #3b82f6; }
 
@@ -640,10 +643,6 @@ function createDivIcon(className, text) {
   return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
-function createTimeIcon(className, text) {
-  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-time ${className}">${text}</div>`, iconSize: [46, 26], iconAnchor: [23, 13] });
-}
-
 function initMap() {
   if (map) return;
   map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
@@ -699,15 +698,23 @@ function updateMapMarkers() {
   document.getElementById('mapTitle').textContent = `🗺️ ${dep.shortLabel || dep.label} ➔ ${arr.shortLabel || arr.label}`;
 
   const trip = selectedOrNextTrip();
-  const depTimeLabel = trip ? trip.p : "P";
-  const arrTimeLabel = trip ? trip.a : "A";
+  const depTimeLabel = trip ? trip.p : "";
+  const arrTimeLabel = trip ? trip.a : "";
+  const depTooltip = `<b>${dep.shortLabel || dep.label}</b>${depTimeLabel ? ` · ${depTimeLabel}` : ""}`;
+  const arrTooltip = `<b>${arr.shortLabel || arr.label}</b>${arrTimeLabel ? ` · ${arrTimeLabel}` : ""}`;
 
-  if (depMarker) { depMarker.setLatLng([dep.lat, dep.lng]); depMarker.setIcon(createTimeIcon('pin-dep', depTimeLabel)); }
-  else depMarker = L.marker([dep.lat, dep.lng], { icon: createTimeIcon('pin-dep', depTimeLabel) }).addTo(map);
+  if (depMarker) { depMarker.setLatLng([dep.lat, dep.lng]); depMarker.setTooltipContent(depTooltip); }
+  else {
+    depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
+    depMarker.bindTooltip(depTooltip, { permanent: true, direction: 'top', offset: [0, -12], className: 'stop-tooltip stop-tooltip-dep' });
+  }
   depMarker.bindPopup(`<b>Partenza ${depTimeLabel}:</b><br>${dep.label}`);
 
-  if (arrMarker) { arrMarker.setLatLng([arr.lat, arr.lng]); arrMarker.setIcon(createTimeIcon('pin-arr', arrTimeLabel)); }
-  else arrMarker = L.marker([arr.lat, arr.lng], { icon: createTimeIcon('pin-arr', arrTimeLabel) }).addTo(map);
+  if (arrMarker) { arrMarker.setLatLng([arr.lat, arr.lng]); arrMarker.setTooltipContent(arrTooltip); }
+  else {
+    arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
+    arrMarker.bindTooltip(arrTooltip, { permanent: true, direction: 'bottom', offset: [0, 12], className: 'stop-tooltip stop-tooltip-arr' });
+  }
   arrMarker.bindPopup(`<b>Arrivo ${arrTimeLabel}:</b><br>${arr.label}`);
 
   redrawCpMarkers();
