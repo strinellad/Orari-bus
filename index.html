@@ -381,7 +381,7 @@ const demetrioToAQ = [
   {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio"},
   {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro-Goriano Valli"},
   {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"S.Benedetto in Perillis"},
-  {p:"17:10", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo", giro:true, note:"partenza 17:10 o 17:20 secondo fermata"},
+  {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio-Tussillo"},
   {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Bominaco"}
 ];
 
@@ -735,7 +735,10 @@ function redrawCpMarkers() {
   }
 }
 
+let osrmRequestToken = 0;
+
 async function fetchOSRMRoute() {
+  const myToken = ++osrmRequestToken;
   try {
     const { dep, arr } = getRouteCoords();
     const viaPoints = currentViaPoints();
@@ -746,7 +749,11 @@ async function fetchOSRMRoute() {
     const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
     const res = await fetch(url);
     const data = await res.json();
-    
+
+    // Se nel frattempo è partita una richiesta più recente (es. hai selezionato un'altra corsa),
+    // questa risposta è superata: la scartiamo per non sovrascrivere il percorso giusto.
+    if (myToken !== osrmRequestToken) return;
+
     if (data.routes && data.routes.length > 0) {
       osrmFullCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
       computeCumulativeDistances();
@@ -1282,6 +1289,7 @@ function renderTripList(){
     el.onclick = ()=>{
       if(trackingActive && state.selectedTripKey===key){ stopTracking(true); }
       state.selectedTripKey = (state.selectedTripKey===key ? null : key);
+      lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false;
       renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();
     };
     container.appendChild(el);
@@ -1301,7 +1309,7 @@ function renderSelectedCard(){
   card.style.display = "block";
   card.style.borderColor = trackingActive ? "var(--danger)" : "var(--amber)";
   card.innerHTML = `
-    <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
+    <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; lastPassedCPIndex=-1; lastCutIndex=0; stopAlertTriggered=false; renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
     <div class="selected-label" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</div>
     <div class="next-main">
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
@@ -1337,4 +1345,3 @@ if (trackingActive) requestWakeLock();
 </script>
 </body>
 </html>
-
