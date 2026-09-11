@@ -42,6 +42,9 @@
     --line-2007: #7c93a8;
     --line-2058: #a35a7a;
 
+    --route-ocre: #0891b2;
+    --route-demetrio: #9333ea;
+
     --shadow: 0 10px 28px -14px rgba(15,23,42,0.20);
     --shadow-sm: 0 4px 14px -8px rgba(15,23,42,0.16);
   }
@@ -62,42 +65,22 @@
   }
 
   header{ margin-bottom: 14px; }
-  .eyebrow-row{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap: 3px; text-align:center;
-    margin-bottom: 10px;
-  }
-  h1{
-    font-family:'Outfit', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -0.01em;
-    background: linear-gradient(90deg, var(--text), var(--amber) 140%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .clock{
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-  }
 
   .rss-banner {
-    background: rgba(217,119,6,0.1);
-    border: 1px solid var(--amber);
+    background: rgba(217,119,6,0.12);
+    border: 2px solid var(--amber);
     border-radius: 12px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     margin-bottom: 14px;
     display: none;
     min-height: 68px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
   }
-  .rss-title { font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 4px; letter-spacing: 0.5px; }
+  .rss-title { font-size: 11.5px; font-weight: 700; color: var(--amber); margin-bottom: 5px; letter-spacing: 0.6px; }
   .rss-content-box { opacity: 1; transition: opacity 0.4s ease-in-out; }
   .rss-content-box.fade-out { opacity: 0; }
-  .rss-item-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
-  .rss-item-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; line-height: 1.3; }
+  .rss-item-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .rss-item-desc { font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
 
   .daychip{
     display:flex; align-items:center; justify-content:center; gap:9px;
@@ -105,6 +88,8 @@
     background: var(--surface); border: 1px solid var(--border);
     color: var(--text-dim); line-height:1.4; box-shadow: var(--shadow-sm);
   }
+  .daychip .clock{ font-family: 'JetBrains Mono', monospace; font-weight:700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .daychip-sep{ opacity: .4; }
   .daychip b{ color: var(--text); font-weight:600; }
   .daychip.scolastico{ background: var(--green-soft); border-color: rgba(5,150,105,0.35); }
   .daychip.scolastico .dot{ background: var(--green); }
@@ -121,14 +106,15 @@
 
   .tabbar{ display:flex; gap:8px; margin: 18px 0 10px; }
   .tab{ flex:1; text-align:center; padding: 11px 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor:pointer; user-select:none; transition: border-color .15s, box-shadow .15s; }
-  .tab.active{ background: var(--surface-2); color: var(--text); border-color: var(--amber); box-shadow: 0 0 0 1px rgba(217,119,6,0.25); }
+  .tab.active{ background: var(--surface-2); color: var(--text); }
+  .tab.route-ocre.active{ border-color: var(--route-ocre); box-shadow: 0 0 0 1px rgba(8,145,178,0.25); }
+  .tab.route-demetrio.active{ border-color: var(--route-demetrio); box-shadow: 0 0 0 1px rgba(147,51,234,0.25); }
 
   .dirbar{ display:flex; gap:6px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
   .dirbtn{ flex:1; text-align:center; padding: 9px 6px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--text-dim); cursor:pointer; user-select:none; transition: background .15s, color .15s; }
-  .dirbtn .dir-icon{ font-size: 11px; opacity:.8; }
   .dirbtn.dir-andata.active{ background: var(--amber); color: #2b1400; font-weight: 600; }
   .dirbtn.dir-ritorno.active{ background: var(--green); color: #fff; font-weight: 600; }
-  .tab-icon{ margin-right: 3px; }
+  .tab-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
 
   .next-card{ border-radius: 16px; padding: 18px 18px 16px; background: linear-gradient(155deg, var(--surface-2), var(--surface)); border: 1px solid rgba(217,119,6,0.4); margin-bottom: 22px; position: relative; overflow:hidden; box-shadow: var(--shadow); }
   .next-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background: var(--amber); opacity:.8; }
@@ -142,8 +128,8 @@
   .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 22px; box-shadow: var(--shadow-sm); }
   .map-header{ display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 8px; }
   .map-title{ font-size: 15px; font-weight: 700; white-space: normal; overflow-wrap: break-word; }
+  .map-title-times{ font-weight: 500; color: var(--text-dim); font-size: 13px; }
   .progress-wrap{ margin-bottom: 10px; }
-  .progress-label{ font-size: 11px; color: var(--text-dim); font-weight:600; margin-bottom: 4px; }
   .progress-track{ height: 9px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; }
   .progress-fill{ height: 100%; min-width: 2px; background: linear-gradient(90deg, #4fa88f, #3b82f6); border-radius: 5px; transition: width 0.6s ease; }
   .tua-search-btn{
@@ -161,7 +147,7 @@
   }
   .map-actions{ display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; width: 100%; }
   .loc-badge{ font-size: 12px; padding: 6px 10px; border-radius: 8px; background: var(--surface-2); color: var(--text-dim); flex-shrink: 0; }
-  .gps-btn { background: var(--amber-soft); border: 1px solid rgba(217,119,6,0.4); color: var(--amber); padding: 10px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; user-select: none; flex:1; }
+  .gps-btn { background: var(--green); border: 1px solid var(--green); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; user-select: none; flex:1; letter-spacing: 0.3px; box-shadow: var(--shadow-sm); }
   .gps-btn.tracking{ background: var(--danger); border-color: var(--danger); color: #fff; animation: pulse 2s infinite; }
   @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.7; } }
 
@@ -256,20 +242,12 @@
 <div class="wrap">
 
   <header>
-    <div class="eyebrow-row">
-      <h1>Orari bus TUA</h1>
-      <div class="clock" id="clock">--:--</div>
+    <div id="daychip" class="daychip">
+      <span class="clock" id="clock">--:--</span>
+      <span class="daychip-sep">·</span>
+      <span class="dot"></span><span id="daychipText">—</span>
     </div>
-    <div id="daychip" class="daychip"><span class="dot"></span><span id="daychipText">—</span></div>
   </header>
-
-  <div id="rssBanner" class="rss-banner">
-    <div class="rss-title">📢 AVVISI E NEWS TUA ABRUZZO</div>
-    <div id="rssContentBox" class="rss-content-box">
-      <div id="rssItemTitle" class="rss-item-title"></div>
-      <div id="rssItemDesc" class="rss-item-desc"></div>
-    </div>
-  </div>
 
   <div class="tabbar" id="routeTabs"></div>
   <div class="dirbar" id="dirTabs"></div>
@@ -282,17 +260,24 @@
 
   <div class="map-card">
     <div class="map-header">
-      <span id="mapTitle" class="map-title">🗺️ Mappa Percorso</span>
+      <span id="mapTitle" class="map-title">Mappa percorso</span>
       <div class="map-actions">
         <span id="locStatusBadge" class="loc-badge">GPS Inattivo</span>
-        <button class="gps-btn" id="trackBtn" onclick="toggleTracking()">🔔 Attiva Alert</button>
+        <button class="gps-btn" id="trackBtn" onclick="toggleTracking()">AVVISAMI</button>
       </div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label" id="progressLabel">Percorso: 0%</div>
       <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     </div>
     <div id="map"></div>
+  </div>
+
+  <div id="rssBanner" class="rss-banner">
+    <div class="rss-title">AVVISO TUA ABRUZZO</div>
+    <div id="rssContentBox" class="rss-content-box">
+      <div id="rssItemTitle" class="rss-item-title"></div>
+      <div id="rssItemDesc" class="rss-item-desc"></div>
+    </div>
   </div>
 
   <div class="datebar">
@@ -310,7 +295,7 @@
     <span class="calbar-label">Forza calendario:</span>
     <div class="calopt" data-v="auto">Auto</div>
     <div class="calopt" data-v="si">Scolastico</div>
-    <div class="calopt" data-v="no">Non scol.</div>
+    <div class="calopt" data-v="no">Non scolastico</div>
   </div>
 
   <details class="info">
@@ -698,14 +683,15 @@ function updateMapMarkers() {
   if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
   if (passedPolyline) map.removeLayer(passedPolyline);
   const pf = document.getElementById('progressFill'); if (pf) pf.style.width = "0%";
-  const pl = document.getElementById('progressLabel'); if (pl) pl.textContent = "Percorso: 0%";
 
   const { dep, arr } = getRouteCoords();
-  document.getElementById('mapTitle').textContent = `🗺️ ${dep.shortLabel || dep.label} ➔ ${arr.shortLabel || arr.label}`;
-
   const trip = selectedOrNextTrip();
   const depTimeLabel = trip ? trip.p : "";
   const arrTimeLabel = trip ? trip.a : "";
+  const routeColor = state.route === "ocre" ? "var(--route-ocre)" : "var(--route-demetrio)";
+  const timesPart = (depTimeLabel && arrTimeLabel) ? ` <span class="map-title-times">(${depTimeLabel} → ${arrTimeLabel})</span>` : "";
+  document.getElementById('mapTitle').innerHTML = `<span class="tab-dot" style="background:${routeColor}"></span>${dep.shortLabel || dep.label} → ${arr.shortLabel || arr.label}${timesPart}`;
+
   const depTooltip = `<b>${dep.shortLabel || dep.label}</b>${depTimeLabel ? ` · ${depTimeLabel}` : ""}`;
   const arrTooltip = `<b>${arr.shortLabel || arr.label}</b>${arrTimeLabel ? ` · ${arrTimeLabel}` : ""}`;
 
@@ -831,13 +817,11 @@ function redrawRoutePolylines() {
 
 function updateProgressBar(cutIndex) {
   const fill = document.getElementById('progressFill');
-  const label = document.getElementById('progressLabel');
   if (!fill) return;
   const total = routeCumDist.length ? routeCumDist[routeCumDist.length - 1] : 0;
-  if (!total) { fill.style.width = "0%"; if (label) label.textContent = "Percorso: 0%"; return; }
+  if (!total) { fill.style.width = "0%"; return; }
   const pct = Math.max(0, Math.min(100, (routeCumDist[Math.min(cutIndex, routeCumDist.length - 1)] / total) * 100));
   fill.style.width = `${pct}%`;
-  if (label) label.textContent = `Percorso: ${Math.round(pct)}%`;
 }
 
 // Cerca il punto del tracciato più vicino a una coordinata, SOLO nell'intervallo [fromIdx, toIdx].
@@ -1106,7 +1090,7 @@ document.addEventListener('visibilitychange', () => {
 function updateTrackButtonUI() {
   const btn = document.getElementById('trackBtn');
   if (!btn) return;
-  btn.textContent = trackingActive ? "⏹ Ferma tracking" : "🔔 Attiva Alert";
+  btn.textContent = trackingActive ? "FERMA AVVISO" : "AVVISAMI";
   btn.classList.toggle("tracking", trackingActive);
 }
 
@@ -1152,23 +1136,41 @@ async function fetchTUARss() {
     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tuabruzzo.it/rss.xml')}`);
     const data = await res.json();
     if (data.status === 'ok' && data.items && data.items.length > 0) {
-      const keywords = ['aquila', 'laquila', 'demetrio', 'ocre', 'bominaco', '2001', '2005', '2008', '2046', '2059', '2064', '2007', 'rocca di mezzo', 'tussillo', 'secinaro'];
-      
-      let filtered = data.items.filter(item => {
+      // Solo queste parole chiave: nessun avviso generico, solo quelli che riguardano davvero le nostre tratte.
+      const keywords = ['2007', 'ocre', 'san panfilo', 'rocca di mezzo', 'san demetrio'];
+
+      const filtered = data.items.filter(item => {
         const text = (item.title + " " + item.description).toLowerCase();
         return keywords.some(kw => text.includes(kw));
       });
 
-      rssItems = filtered.length > 0 ? filtered : data.items.slice(0, 5);
+      rssItems = filtered;
 
       if (rssItems.length > 0) {
         document.getElementById('rssBanner').style.display = 'block';
         showRssItem(0);
         if (rssItems.length > 1) startRssCarousel();
+        notifyRelevantRssItem(rssItems[0]);
+      } else {
+        document.getElementById('rssBanner').style.display = 'none';
       }
     }
   } catch(e) {
     console.log("Errore RSS Feed TUA:", e);
+  }
+}
+
+// Notifica a schermo (solo una volta per avviso) quando arriva una news TUA rilevante per le nostre tratte.
+let notifiedRssIds = new Set();
+function notifyRelevantRssItem(item) {
+  const id = item.guid || item.link || item.title;
+  if (!id || notifiedRssIds.has(id)) return;
+  notifiedRssIds.add(id);
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("Avviso TUA per la tua tratta", {
+      body: item.title,
+      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png"
+    });
   }
 }
 
@@ -1197,8 +1199,8 @@ function renderTabs(){
   const routeTabs = document.getElementById("routeTabs"); routeTabs.innerHTML = "";
   Object.entries(ROUTES).forEach(([key,r])=>{
     const el = document.createElement("div");
-    el.className = "tab" + (state.route===key ? " active":"");
-    el.innerHTML = `<span class="tab-icon">${key==="ocre" ? "⛰️" : "🏘️"}</span> ${r.label}`;
+    el.className = "tab " + (key==="ocre" ? "route-ocre" : "route-demetrio") + (state.route===key ? " active":"");
+    el.innerHTML = `<span class="tab-dot" style="background:${key==="ocre" ? "var(--route-ocre)" : "var(--route-demetrio)"}"></span> ${r.label}`;
     el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     routeTabs.appendChild(el);
   });
@@ -1207,7 +1209,7 @@ function renderTabs(){
   Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
     const el = document.createElement("div");
     el.className = "dirbtn " + (key==="fromAQ" ? "dir-andata" : "dir-ritorno") + (state.dir===key ? " active":"");
-    el.innerHTML = `<span class="dir-icon">${key==="fromAQ" ? "🚏➔" : "↩️➔"}</span> ${d.label}`;
+    el.textContent = d.label;
     el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     dirTabs.appendChild(el);
   });
@@ -1219,7 +1221,7 @@ function renderClockAndChip(){
   const info = getDayInfo(state.viewedDate);
   const chip = document.getElementById("daychip");
   chip.className = "daychip " + (info.isHoliday ? "festivo" : (info.isScolastico ? "scolastico" : "nonscolastico"));
-  document.getElementById("daychipText").innerHTML = `<b>${(dateStr(state.viewedDate)===dateStr(now)?"oggi, ":"")+WD[info.dow]} ${state.viewedDate.getDate()}</b> — ` + (info.isHoliday?"festivo":(info.isScolastico?"scolastico":"feriale, no scuola"));
+  document.getElementById("daychipText").innerHTML = `<b>${(dateStr(state.viewedDate)===dateStr(now)?"oggi, ":"")+WD[info.dow]} ${state.viewedDate.getDate()}</b> — ` + (info.isHoliday?"festivo":(info.isScolastico?"scolastico":"non scolastico"));
 }
 
 function tripDuration(trip){ return toMinutes(trip.a)-toMinutes(trip.p); }
