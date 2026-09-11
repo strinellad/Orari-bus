@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Orari Bus · San Demetrio / San Panfilo ⇄ L'Aquila</title>
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0c1016">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root{
+    --bg: #0c1016;
+    --bg-2: #10151d;
+    --surface: #161c26;
+    --surface-2: #1d2531;
+    --surface-3: #262f3d;
+    --border: #2b3444;
+    --border-soft: #212938;
+    --text: #eef1f6;
+    --text-dim: #aab3c4;
+    --text-faint: #838da0;
+
+    --amber: #f5a524;
+    --amber-strong: #ffb946;
+    --amber-soft: rgba(245,165,36,0.14);
+    --green: #34d399;
+    --green-soft: rgba(52,211,153,0.14);
+    --danger: #fb5a72;
+    --danger-soft: rgba(251,90,114,0.14);
+
+    --line-2001: #7fa889;
+    --line-2005: #a68ad0;
+    --line-2008: #dd8a97;
+    --line-2046: #79aee0;
+    --line-2059: #ceA05e;
+    --line-2064: #5fc7ac;
+    --line-2007: #9ab0c4;
+    --line-2058: #c780a0;
+
+    --route-ocre: #2dd4d4;
+    --route-demetrio: #b48af0;
+
+    --shadow: 0 16px 40px -18px rgba(0,0,0,0.65);
+    --shadow-sm: 0 8px 20px -12px rgba(0,0,0,0.55);
+    --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(620px 340px at 12% -10%, rgba(245,165,36,0.08), transparent 60%),
+      radial-gradient(500px 300px at 100% 0%, rgba(52,211,153,0.05), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  ::selection{ background: var(--amber-soft); color: var(--amber-strong); }
+
+  .wrap{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 22px 16px 44px;
+  }
+
+  header{ margin-bottom: 16px; }
+
+  .rss-banner {
+    background: linear-gradient(160deg, rgba(245,165,36,0.10), rgba(245,165,36,0.03));
+    border: 1px solid rgba(245,165,36,0.30);
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 14px;
+    display: none;
+    min-height: 68px;
+    box-shadow: var(--shadow-sm);
+  }
+  .rss-title { font-size: 10.5px; font-weight: 700; color: var(--amber-strong); margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .rss-content-box { opacity: 1; transition: opacity 0.4s ease-in-out; }
+  .rss-content-box.fade-out { opacity: 0; }
+  .rss-item-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .rss-item-desc { font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.45; }
+
+  .daychip{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size: 14.5px; padding: 13px 16px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim); line-height:1.4; box-shadow: var(--shadow-sm), var(--shadow-inset);
+  }
+  .daychip .clock{ font-family: 'JetBrains Mono', monospace; font-weight:700; color: var(--text); font-variant-numeric: tabular-nums; font-size: 15px; letter-spacing: 0.02em; }
+  .daychip-sep{ opacity: .35; }
+  .daychip b{ color: var(--text); font-weight:600; }
+  .daychip.scolastico{ background: var(--green-soft); border-color: rgba(52,211,153,0.30); }
+  .daychip.scolastico .dot{ background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.7); }
+  .daychip.nonscolastico{ background: var(--amber-soft); border-color: rgba(245,165,36,0.30); }
+  .daychip.nonscolastico .dot{ background: var(--amber); box-shadow: 0 0 8px rgba(245,165,36,0.7); }
+  .daychip.festivo{ background: var(--danger-soft); border-color: rgba(251,90,114,0.30); }
+  .daychip.festivo .dot{ background: var(--danger); box-shadow: 0 0 8px rgba(251,90,114,0.7); }
+  .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+
+  .calbar{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin: 18px 0 0; padding: 11px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .calbar-label{ font-size: 11.5px; color: var(--text-faint); margin-right: 2px; }
+  .calopt{
+    font-size: 11.5px; padding: 7px 11px; border-radius: 9px; border: none;
+    background: var(--surface-3); color: var(--text-dim); cursor:pointer; user-select:none;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+    transition: background .15s, color .15s, transform .1s, box-shadow .1s;
+  }
+  .calopt:active{ transform: translateY(2px); box-shadow: none; }
+  .calopt.active{ background: linear-gradient(160deg, var(--amber-strong), #d98a12); color: #241804; font-weight: 800; box-shadow: 0 2px 0 #8a5300; }
+
+  /* Selettore tratta: interruttore netto aut/aut, non un semplice paio di tab */
+  .tabbar{
+    display:flex; gap:5px; margin: 18px 0 10px; padding: 6px;
+    background: var(--bg-2); border-radius: 18px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.45), inset 0 -1px 0 rgba(255,255,255,0.03);
+  }
+  .tab{
+    flex:1; text-align:center; padding: 14px 8px; border-radius: 13px; border: none;
+    background: transparent; color: var(--text-faint); font-size: 13.5px; font-weight: 600;
+    cursor:pointer; user-select:none; position:relative;
+    transition: background .18s, color .18s, transform .1s, box-shadow .18s;
+  }
+  .tab .tab-dot{ display:none; }
+  .tab.active{ color:#fff; font-weight: 800; transform: translateY(-1px); }
+  .tab.route-ocre.active{
+    background: linear-gradient(160deg, #35e5e5, #0891b2);
+    box-shadow: 0 3px 0 #066576, 0 8px 16px -6px rgba(8,145,178,0.6);
+  }
+  .tab.route-demetrio.active{
+    background: linear-gradient(160deg, #cba3ff, #9333ea);
+    box-shadow: 0 3px 0 #6a1fb0, 0 8px 16px -6px rgba(147,51,234,0.6);
+  }
+  .tab.active::after{
+    content:"✓"; display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,0.28);
+    font-size:10px; font-weight:900; margin-left:6px; vertical-align:middle;
+  }
+
+  .dirbar{ display:flex; gap:5px; background: var(--bg-2); border-radius: 15px; padding: 5px; margin-bottom: 18px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.4); }
+  .dirbtn{ flex:1; text-align:center; padding: 11px 6px; border-radius: 11px; font-size: 13px; font-weight: 600; color: var(--text-dim); cursor:pointer; user-select:none; transition: background .15s, color .15s, transform .1s, box-shadow .15s; }
+  .dirbtn.dir-andata.active{
+    background: linear-gradient(160deg, var(--amber-strong), #d98a12); color: #241804; font-weight: 800;
+    box-shadow: 0 3px 0 #8a5300, 0 6px 14px -8px rgba(245,165,36,0.6); transform: translateY(-1px);
+  }
+  .dirbtn.dir-ritorno.active{
+    background: linear-gradient(160deg, #52edb0, #1cae74); color: #04231a; font-weight: 800;
+    box-shadow: 0 3px 0 #0d6b45, 0 6px 14px -8px rgba(52,211,153,0.6); transform: translateY(-1px);
+  }
+  .tab-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+
+  /* Pannello "prossima corsa": stessa estetica sobria della card "corsa selezionata" */
+  .next-card{
+    border-radius: 16px; padding: 15px 17px;
+    background: var(--surface); border: 1px solid var(--amber);
+    margin-bottom: 22px; position: relative;
+    box-shadow: var(--shadow), var(--shadow-inset);
+  }
+  .next-label{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size: 10.5px; color: var(--amber-strong); font-weight: 700; margin-bottom: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .next-label .when-chip{
+    font-size: 11px; font-weight: 800; color: #241804; text-transform:none; letter-spacing:0;
+    background: linear-gradient(160deg, var(--amber-strong), var(--amber));
+    padding: 4px 9px; border-radius: 7px; white-space:nowrap;
+  }
+  .next-main{ display:flex; align-items:center; gap:13px; }
+  .roundel{
+    flex:none; width: 44px; height:44px; border-radius: 50%; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-weight:800; font-size: 12px; color: #10131a;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.35), inset 0 -3px 4px rgba(0,0,0,0.25), 0 6px 12px -6px rgba(0,0,0,0.6);
+  }
+  .next-times{ font-family:'JetBrains Mono', monospace; font-size: 28px; font-weight: 800; line-height:1.1; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
+  .next-times small{ color: var(--text-faint); font-weight: 500; }
+  .next-sub{ margin-top: 10px; font-size: 13px; color: var(--text-dim); }
+
+  .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 13px; margin-bottom: 22px; box-shadow: var(--shadow-sm), var(--shadow-inset); }
+  .map-header{ display: flex; flex-direction: column; align-items: stretch; gap: 9px; margin-bottom: 9px; }
+  .map-title{ font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; white-space: normal; overflow-wrap: break-word; }
+  .map-title-times{ font-weight: 500; color: var(--text-dim); font-size: 13px; font-family: 'Inter', sans-serif; }
+  .progress-wrap{ margin-bottom: 11px; }
+  .progress-track{ height: 8px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; }
+  .progress-fill{ height: 100%; min-width: 2px; background: linear-gradient(90deg, var(--green), #38bdf8); border-radius: 5px; transition: width 0.6s ease; }
+  .tua-search-btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; margin-bottom:16px; padding:15px; border-radius:16px; border: none;
+    background: linear-gradient(160deg, #4c7bff, #2447c9);
+    color:#fff; font-size:14px; font-weight:700; cursor:pointer; text-align:center;
+    box-shadow: 0 5px 0 #17369e, 0 14px 26px -12px rgba(45,90,240,0.55);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .tua-search-btn:active{ transform: translateY(4px); box-shadow: 0 1px 0 #17369e, 0 6px 14px -10px rgba(45,90,240,0.5); }
+  .tua-logo-badge{
+    flex:none; width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -2px 3px rgba(0,0,0,0.2);
+  }
+  .map-actions{ display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; width: 100%; }
+  .loc-badge{ font-size: 11.5px; padding: 7px 11px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--text-dim); flex-shrink: 0; }
+  .gps-btn {
+    background: linear-gradient(160deg, #52edb0, #1cae74); border: none; color: #04231a;
+    padding: 12px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+    user-select: none; flex:1; letter-spacing: 0.02em;
+    box-shadow: 0 4px 0 #0d6b45, 0 8px 16px -8px rgba(28,174,116,0.5);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .gps-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #0d6b45; }
+  .gps-btn.tracking{ background: linear-gradient(160deg, #ff7a8e, var(--danger)); color: #2a0208; box-shadow: 0 4px 0 #9c1f30, 0 8px 16px -8px rgba(251,90,114,0.5); animation: pulse 2s infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.72; } }
+
+  #map{ height: 260px; width: 100%; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); filter: saturate(0.85) brightness(0.95); }
+
+  .offline-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 13px 15px; margin-bottom: 22px; box-shadow: var(--shadow-sm), var(--shadow-inset); }
+  .offline-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .offline-title{ font-size: 13px; font-weight: 700; color: var(--text); }
+  .offline-sub{ font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .offline-btn{
+    flex:none; border: none; border-radius: 11px; padding: 10px 14px; font-size: 12.5px; font-weight: 800;
+    cursor: pointer; color: #04231a; background: linear-gradient(160deg, #52edb0, #1cae74);
+    box-shadow: 0 3px 0 #0d6b45; transition: transform .1s, box-shadow .1s;
+  }
+  .offline-btn:active{ transform: translateY(3px); box-shadow: 0 0 0 #0d6b45; }
+  .offline-btn.busy{ background: linear-gradient(160deg, var(--amber-strong), #d98a12); color:#241804; box-shadow: 0 3px 0 #8a5300; cursor: default; }
+  .offline-btn.ready{ background: linear-gradient(160deg, #4c7bff, #2447c9); color:#fff; box-shadow: 0 3px 0 #17369e; }
+  .offline-progress-track{ margin-top: 10px; height: 7px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; display:none; }
+  .offline-progress-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--amber), var(--amber-strong)); border-radius:5px; transition: width .3s ease; }
+  .offline-status{ margin-top: 8px; font-size: 11px; color: var(--text-faint); }
+
+  .custom-div-icon { background: none; border: none; }
+  .map-pin { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 11px; color: #10131a; box-shadow: 0 3px 10px rgba(0,0,0,0.6); border: 2px solid #10131a; }
+  .pin-dep { background: var(--amber); }
+  .pin-arr { background: var(--green); color: #04231a; }
+  .pin-cp { width: 18px; height: 18px; background: var(--surface-2); border: 2px solid var(--amber); color: var(--amber-strong); font-size: 9px; }
+  .stop-tooltip{ background: rgba(10,13,18,0.95); color:#fff; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 4px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+  .stop-tooltip::before{ display:none; }
+  .stop-tooltip-dep{ color: var(--amber-strong); }
+  .stop-tooltip-arr{ color: var(--green); }
+  .pin-cp.passed { background: var(--green); border-color: #10131a; color: #04231a; }
+  .pin-user { width: 18px; height: 18px; background: #38bdf8; border-radius: 50%; border: 3px solid #10131a; box-shadow: 0 0 14px #38bdf8; }
+
+  .leaflet-popup-content-wrapper { background: var(--surface-2); color: var(--text); border-radius: 9px; border: 1px solid var(--border); }
+  .leaflet-popup-tip { background: var(--surface-2); }
+
+  .datebar{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 11px; }
+  .datebar .datebtns{ display:flex; align-items:center; gap:5px; }
+  .stepbtn{
+    width: 42px; height:42px; border-radius: 12px; border: none;
+    background: linear-gradient(160deg, var(--surface-3), var(--surface)); color: var(--text);
+    font-size: 19px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow: 0 3px 0 #060810, var(--shadow-sm); user-select:none;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .stepbtn:active{ transform: translateY(3px); box-shadow: 0 0 0 #060810; }
+  .dateLabel{ font-size: 15px; font-weight: 600; color: var(--text); min-width: 150px; text-align:center; }
+  .dateLabel .dow{ color: var(--text-dim); font-weight: 500; font-size: 12.5px; text-transform: capitalize; }
+
+  .listtitle{ font-family:'Outfit', sans-serif; font-size: 15.5px; font-weight: 700; margin: 4px 0 10px; }
+
+  .trip{
+    display:flex; flex-direction:column; gap:7px;
+    padding: 13px 14px; margin-bottom: 8px;
+    background: var(--surface); border: 1px solid var(--border-soft); cursor:pointer;
+    border-radius: 13px; transition: background .15s, border-color .15s, transform .1s;
+  }
+  .trip:active{ transform: scale(0.99); background: var(--surface-2); }
+  .trip.passed{ opacity: 0.32; }
+  .trip.selected{ background: var(--amber-soft); border-color: var(--amber); box-shadow: 0 0 0 1px rgba(245,165,36,0.35); }
+  .trip-top{ display:flex; align-items:center; gap:11px; }
+  .trip-name{ font-size: 13.5px; font-weight: 700; color: var(--text); line-height:1.35; }
+  .trip-duration{ color: var(--text-dim); font-weight: 500; font-size: 12px; }
+  .trip-sub{ font-size: 11.5px; color: var(--text-dim); line-height:1.4; }
+  .trip-extra{ display:flex; flex-direction:column; gap:5px; margin-top:2px; }
+  .xbadge{ display:block; width:100%; font-size:11px; padding:6px 9px; border-radius:8px; line-height:1.45; font-weight:600; }
+  .xbadge.giro{ background: rgba(166,138,208,0.16); color:#d3c2ef; }
+  .xbadge.offapp{ background: var(--danger-soft); color:#ffb0bc; }
+  .xbadge.cartaceo{ background: var(--amber-soft); color: var(--amber-strong); }
+  .xbadge.note{ background: var(--surface-2); color: var(--text-dim); font-weight:500; }
+  .xbadge.arrto{ background: rgba(251,90,114,0.16); color:#ffb0bc; }
+
+  .selected-card{ border-radius: 16px; padding: 15px 17px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; box-shadow: var(--shadow), var(--shadow-inset); }
+  .selected-card .closebtn{ position:absolute; top:11px; right:13px; color:var(--text-dim); font-size:16px; cursor:pointer; }
+  .selected-label{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size: 10.5px; color: var(--amber-strong); font-weight: 700; margin-bottom: 9px;
+    letter-spacing:.08em; text-transform: uppercase; padding-right: 22px;
+  }
+  .selected-label .when-chip{
+    font-size: 11px; font-weight: 800; color: #241804; text-transform:none; letter-spacing:0;
+    background: linear-gradient(160deg, var(--amber-strong), var(--amber));
+    padding: 4px 9px; border-radius: 7px; white-space:nowrap;
+  }
+  .selected-label.tracking .when-chip{ background: linear-gradient(160deg, #ff8a9c, var(--danger)); color:#2a0208; }
+  .roundel-sm{
+    flex:none; width: 36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-weight:800; font-size: 10.5px; color:#10131a;
+    box-shadow: inset 0 2px 2px rgba(255,255,255,0.35), inset 0 -2px 3px rgba(0,0,0,0.25), 0 3px 6px -3px rgba(0,0,0,0.6);
+  }
+  .trip-times{ font-family:'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; white-space:nowrap; font-variant-numeric: tabular-nums; }
+  .trip-times .arrow{ color: var(--text-faint); font-weight:400; margin:0 5px; }
+  .badge{ flex:none; margin-left:auto; font-size: 11px; padding: 4px 9px; border-radius: 8px; border: 1px solid var(--border); color: var(--text-dim); font-weight: 500; }
+  .badge.fa{ color: var(--green); border-color: rgba(52,211,153,0.30); background: rgba(52,211,153,0.06); }
+  .badge.fs{ color: var(--amber-strong); border-color: rgba(245,165,36,0.30); background: rgba(245,165,36,0.06); }
+  .badge.fns{ color: #c3aef2; border-color: rgba(180,138,240,0.30); background: rgba(180,138,240,0.06); }
+
+  details.info{ margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 15px; }
+  details.info summary{ font-size: 13px; font-weight: 600; cursor:pointer; color: var(--text); list-style: none; }
+  details.info summary::-webkit-details-marker{ display:none; }
+  details.info summary::before{ content:"›"; display:inline-block; margin-right:7px; color: var(--amber); font-weight:700; transition: transform .15s; }
+  details.info[open] summary::before{ transform: rotate(90deg); }
+  .info-body{ margin-top: 11px; font-size: 12.5px; color: var(--text-dim); line-height:1.65; }
+  .info-body p{ margin: 0 0 9px; }
+  .info-body p:last-child{ margin-bottom:0; }
+
+  .stop-alert-overlay{
+    display:none; position:fixed; inset:0; z-index:9999;
+    flex-direction:column; align-items:center; justify-content:center; gap:22px;
+    background: rgba(120,8,8,0.94);
+    animation: flashbg 0.6s steps(1) infinite;
+  }
+  .stop-alert-overlay.show{ display:flex; }
+  @keyframes flashbg{ 50%{ background: rgba(16,16,16,0.97); } }
+  .stop-sign{
+    width: 150px; height: 150px;
+    background: #e0432c; border: 6px solid #fff;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    display:flex; align-items:center; justify-content:center;
+    animation: blinkstop 0.6s steps(1) infinite;
+    box-shadow: 0 0 60px -10px rgba(224,67,44,0.9);
+  }
+  @keyframes blinkstop{ 50%{ opacity: 0.25; transform: scale(0.94); } }
+  .stop-sign-inner{ color:#fff; font-family:'Outfit', sans-serif; font-weight:800; font-size:28px; letter-spacing:2px; }
+  .stop-alert-text{ color:#fff; font-size:19px; font-weight:700; text-align:center; max-width:82%; line-height:1.4; }
+  .stop-alert-btn{
+    background:#fff; color:#8c0a0a; border:none; padding: 14px 34px; border-radius: 30px;
+    font-size:16px; font-weight:700; cursor:pointer;
+  }
+
+  ::-webkit-scrollbar{ width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+  ::-webkit-scrollbar-thumb{ background: var(--surface-3); border-radius: 8px; }
+</style>
+</head>
+<body>
+
+  <div id="stopAlertOverlay" class="stop-alert-overlay">
+    <div class="stop-sign">
+      <div class="stop-sign-inner">STOP</div>
+    </div>
+    <div class="stop-alert-text" id="stopAlertText">Richiedi la fermata!</div>
+    <button class="stop-alert-btn" onclick="dismissStopAlert()">✓ Ho capito</button>
+  </div>
+<div class="wrap">
+
+  <header>
+    <div id="daychip" class="daychip">
+      <span class="clock" id="clock">--:--</span>
+      <span class="daychip-sep">·</span>
+      <span class="dot"></span><span id="daychipText">—</span>
+    </div>
+  </header>
+
+  <div class="tabbar" id="routeTabs"></div>
+  <div class="dirbar" id="dirTabs"></div>
+
+  <button class="tua-search-btn" onclick="openTuaSearch()"><span class="tua-logo-badge">🚌</span> Cerca questa tratta sull'app TUA</button>
+
+  <div class="next-card" id="nextCard"></div>
+
+  <div class="selected-card" id="selectedCard" style="display:none;"></div>
+
+  <div class="map-card">
+    <div class="map-header">
+      <span id="mapTitle" class="map-title">Mappa percorso</span>
+      <div class="map-actions">
+        <span id="locStatusBadge" class="loc-badge">GPS Inattivo</span>
+        <button class="gps-btn" id="trackBtn" onclick="toggleTracking()">AVVISAMI</button>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="offline-card">
+    <div class="offline-row">
+      <div>
+        <div class="offline-title">💾 Salva pagina offline</div>
+        <div class="offline-sub" id="offlineSub">Include orari, percorsi e mappa: apribile senza rete</div>
+      </div>
+      <button class="offline-btn" id="offlineBtn" onclick="startOfflineDownload()">Scarica</button>
+    </div>
+    <div class="offline-progress-track" id="offlineProgressTrack">
+      <div class="offline-progress-fill" id="offlineProgressFill"></div>
+    </div>
+    <div class="offline-status" id="offlineStatus"></div>
+  </div>
+
+  <div class="datebar">
+    <div class="listtitle">Corse del giorno</div>
+    <div class="datebtns">
+      <div class="stepbtn" id="prevDay">‹</div>
+      <div class="dateLabel" id="dateLabel">oggi</div>
+      <div class="stepbtn" id="nextDay">›</div>
+    </div>
+  </div>
+
+  <div id="tripList"></div>
+
+  <div class="calbar" id="calBar">
+    <span class="calbar-label">Forza calendario:</span>
+    <div class="calopt" data-v="auto">Auto</div>
+    <div class="calopt" data-v="si">Scolastico</div>
+    <div class="calopt" data-v="no">Non scolastico</div>
+  </div>
+
+  <div id="rssBanner" class="rss-banner">
+    <div class="rss-title">AVVISO TUA ABRUZZO</div>
+    <div id="rssContentBox" class="rss-content-box">
+      <div id="rssItemTitle" class="rss-item-title"></div>
+      <div id="rssItemDesc" class="rss-item-desc"></div>
+    </div>
+  </div>
+
+  <details class="info">
+    <summary>Legenda sigle e simboli</summary>
+    <div class="info-body">
+      <p><b style="color:var(--green)">FA</b> — Feriale Annuale (sempre attiva, tutto l'anno)</p>
+      <p><b style="color:var(--amber)">FS</b> — Feriale Scolastico (attiva solo nei giorni di scuola, dal 14/09/2026)</p>
+      <p><b style="color:#7c5cbf">FNS</b> — Feriale Non Scolastico (attiva nei periodi di vacanza scolastica)</p>
+      <p><span class="xbadge arrto">🏁 ARRIVA A CENCIONI</span> — questa corsa non arriva fino al Terminal: si ferma prima, a Cencioni (zona cimitero)</p>
+      <p><span class="xbadge giro">⚠️ PERCORSO LUNGO</span> — la corsa fa il giro Sant'Eusanio-Villa Sant'Angelo-Stiffe (più lunga, valutala con attenzione)</p>
+      <p><span class="xbadge offapp">🚫 NON SU APP TUA</span> — corsa presente in orario ma non mostrata nell'app ufficiale TUA</p>
+      <p><span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span> — linea 2005, acquisto solo con biglietto cartaceo, non biglietteria elettronica</p>
+      <p>Tocca una corsa nell'elenco per selezionarla e vederne i dettagli.</p>
+    </div>
+  </details>
+
+</div>
+
+<script>
+/* COORDINATE CHECKPOINT SAN PANFILO D'OCRE */
+const OCRE_CHECKPOINTS = [
+  { id: 0, name: "Terminal Collemaggio", lat: 42.3444, lng: 13.4009 },
+  { id: 1, name: "Sant'Elia SS17/SS5bis", lat: 42.339161, lng: 13.40928 },
+  { id: 2, name: "Via Marsicana 123", lat: 42.3093335, lng: 13.4429412 },
+  { id: 3, name: "CP3", lat: 42.305916, lng: 13.453780 },
+  { id: 4, name: "CP4", lat: 42.300466, lng: 13.453139 },
+  { id: 5, name: "SR 5 bis Vestina", lat: 42.295833, lng: 13.453444 },
+  { id: 6, name: "San Felice", lat: 42.293446, lng: 13.453799 },
+  { id: 7, name: "CP7", lat: 42.291561, lng: 13.458896 },
+  { id: 8, name: "San Panfilo - Via Silone", lat: 42.2866969, lng: 13.47107 },
+  { id: 9, name: "San Panfilo d'Ocre Arrivo", lat: 42.285278, lng: 13.473750 }
+];
+
+const STOPS_COORDS = {
+  ocre: { lat: 42.285278, lng: 13.473750, label: "San Panfilo d'Ocre (Arrivo)", shortLabel: "San Panfilo d'Ocre" },
+  demetrio: { lat: 42.2882078, lng: 13.5581750, label: "San Demetrio Uff. Postale", shortLabel: "San Demetrio" },
+  laquila: { lat: 42.3444, lng: 13.4009, label: "L'Aquila Terminal Collemaggio", shortLabel: "L'Aquila" }
+};
+
+/* ORARI */
+const demetrioFromAQ = [
+  {p:"07:50", a:"08:28", linea:"2001", tipo:"FNS", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila", giro:true, offApp:true},
+  {p:"08:00", a:"08:17", linea:"2059", tipo:"FS", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"08:00", a:"08:25", linea:"2059", tipo:"FNS", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"08:00", a:"08:40", linea:"2064", tipo:"FS", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", giro:true, offApp:true},
+  {p:"08:00", a:"08:25", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila", offApp:true},
+  {p:"10:15", a:"10:38", linea:"2001", tipo:"FS", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"11:40", a:"12:09", linea:"2046", tipo:"FA", nome:"San Benedetto in Perillis - Navelli - San Demetrio nei Vestini - Poggio Picenze - L'Aquila"},
+  {p:"12:10", a:"12:27", linea:"2059", tipo:"FA", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"12:20", a:"13:02", linea:"2001", tipo:"FS", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila", giro:true},
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FS", nome:"L'Aquila - San Demetrio"},
+  {p:"13:10", a:"13:35", linea:"2058", tipo:"FNS", nome:"L'Aquila - San Demetrio"},
+  {p:"13:20", a:"13:45", linea:"2058", tipo:"FS", nome:"L'Aquila - San Demetrio"},
+  {p:"13:37", a:"14:20", linea:"2064", tipo:"FS", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", note:"passa dal Terminal"},
+  {p:"13:37", a:"14:20", linea:"2064", tipo:"FNS", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", note:"parte dal Terminal", giro:true},
+  {p:"14:05", a:"14:28", linea:"2005", tipo:"FA", nome:"Pescocostanzo - Rivisondoli - Castel di Sangro - Roccaraso - Roccapia - Pettorano sul Gizio - Sulmona - Pratola Peligna - Corfinio - Raiano - Molina Aterno - Acciano - Roccapreturo - Fontecchio - San Demetrio nei Vestini - L'Aquila", cartaceo:true},
+  {p:"14:10", a:"14:48", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila", giro:true},
+  {p:"16:40", a:"17:05", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"17:00", a:"17:21", linea:"2059", tipo:"FA", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"19:00", a:"19:23", linea:"2046", tipo:"FA", nome:"San Benedetto in Perillis - Navelli - San Demetrio nei Vestini - Poggio Picenze - L'Aquila"},
+  {p:"19:15", a:"19:55", linea:"2064", tipo:"FA", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", giro:true}
+];
+
+const demetrioToAQ = [
+  {p:"07:09", a:"07:50", linea:"2064", tipo:"FS", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", giro:true},
+  {p:"07:11", a:"07:40", linea:"2059", tipo:"FNS", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila", offApp:true},
+  {p:"07:14", a:"07:42", linea:"2059", tipo:"FS", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"07:25", a:"07:50", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"07:31", a:"07:55", linea:"2005", tipo:"FA", nome:"Pescocostanzo - Rivisondoli - Castel di Sangro - Roccaraso - Roccapia - Pettorano sul Gizio - Sulmona - Pratola Peligna - Corfinio - Raiano - Molina Aterno - Acciano - Roccapreturo - Fontecchio - San Demetrio nei Vestini - L'Aquila", cartaceo:true},
+  {p:"08:30", a:"08:55", linea:"2059", tipo:"FNS", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"08:40", a:"09:00", linea:"2064", tipo:"FS", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila", stopsAtCencioni:true},
+  {p:"09:45", a:"10:10", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"09:58", a:"10:25", linea:"2059", tipo:"FA", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"11:31", a:"11:55", linea:"2001", tipo:"FS", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"13:25", a:"13:50", linea:"2001", tipo:"FS", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"13:35", a:"14:00", linea:"2059", tipo:"FA", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"15:32", a:"16:00", linea:"2008", tipo:"FA", nome:"Castelvecchio Calvisio - Carapelle Calvisio - San Pio delle Camere - Poggio Picenze - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"},
+  {p:"16:19", a:"16:50", linea:"2059", tipo:"FA", nome:"Secinaro - Castelvecchio Subequo - Molina Aterno - Acciano - Fontecchio - San Demetrio nei Vestini - L'Aquila"},
+  {p:"16:20", a:"16:45", linea:"2046", tipo:"FA", nome:"San Benedetto in Perillis - Navelli - San Demetrio nei Vestini - Poggio Picenze - L'Aquila"},
+  {p:"17:20", a:"17:50", linea:"2064", tipo:"FA", nome:"San Demetrio nei Vestini - Fagnano Alto - Villa Sant'Angelo - Sant'Eusanio Forconese - San Demetrio nei Vestini - L'Aquila"},
+  {p:"18:25", a:"18:50", linea:"2001", tipo:"FA", nome:"Caporciano - San Pio delle Camere - Prata d'Ansidonia - San Demetrio nei Vestini - L'Aquila"}
+];
+
+const ocreFromAQ = [
+  {p:"06:00", a:"06:21", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"06:45", a:"07:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:10", a:"08:31", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"solo sab", giorno:d=>d===6},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"lun–ven", giorno:d=>d>=1&&d<=5},
+  {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"}
+];
+
+const ocreToAQ = [
+  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"tranne mar", giorno:d=>d!==2},
+  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"martedì", giorno:d=>d===2},
+  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"}
+];
+
+const ROUTES = {
+  ocre: {
+    label: "San Panfilo d'Ocre",
+    directions: {
+      fromAQ: { label: "L'Aquila ➔ San Panfilo", depStop:"L'Aquila Terminal", arrStop:"San Panfilo d'Ocre Arrivo", trips: ocreFromAQ },
+      toAQ:   { label: "San Panfilo ➔ L'Aquila", depStop:"San Panfilo d'Ocre Arrivo", arrStop:"L'Aquila Terminal", trips: ocreToAQ }
+    }
+  },
+  demetrio: {
+    label: "San Demetrio",
+    directions: {
+      fromAQ: { label: "L'Aquila ➔ San Demetrio", depStop:"L'Aquila Terminal", arrStop:"San Demetrio Uff.Postale", trips: demetrioFromAQ },
+      toAQ:   { label: "San Demetrio ➔ L'Aquila", depStop:"San Demetrio Uff.Postale", arrStop:"L'Aquila Terminal", trips: demetrioToAQ }
+    }
+  }
+};
+
+const LINE_COLORS = {
+  "2001": "var(--line-2001)", "2005": "var(--line-2005)", "2008": "var(--line-2008)",
+  "2046": "var(--line-2046)", "2059": "var(--line-2059)", "2064": "var(--line-2064)", "2007": "var(--line-2007)",
+  "2058": "var(--line-2058)"
+};
+
+const SCHOOL_YEAR = { start: "2026-09-14", end: "2027-06-09" };
+const SCHOOL_BREAKS = [["2026-12-07","2026-12-07"], ["2026-12-23","2027-01-06"], ["2027-03-25","2027-03-30"]];
+const HOLIDAYS = ["2026-10-04","2026-11-01","2026-12-08","2026-12-25","2026-12-26","2027-01-01","2027-01-06","2027-03-28","2027-03-29","2027-04-25","2027-05-01","2027-06-02"];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function dateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// Apre la pagina di ricerca dell'app TUA (mycicero) per la tratta e direzione correnti,
+// usando come data/ora quella del giorno selezionato in app (oggi = adesso, altro giorno = ore 8:00).
+function openTuaSearch(){
+  const AQ = { text: "L'Aquila, Aquila, ITA", lat: 42.35055, lng: 13.39954 };
+  const DEST = state.route === "ocre"
+    ? { text: "San Panfilo d'Ocre, L'Aquila, ITA", lat: STOPS_COORDS.ocre.lat, lng: STOPS_COORDS.ocre.lng }
+    : { text: "San Demetrio ne' Vestini, L'Aquila, ITA", lat: 42.2880401, lng: 13.5581851 };
+
+  const start = state.dir === "fromAQ" ? AQ : DEST;
+  const end = state.dir === "fromAQ" ? DEST : AQ;
+
+  // Orario di ricerca: il sito TUA non mostra corse troppo prima o troppo dopo l'orario
+  // impostato, quindi ci posizioniamo circa 2 ore prima della corsa di riferimento
+  // (quella selezionata, o la prima valida del giorno se non ne hai scelta una).
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const info = getDayInfo(state.viewedDate);
+  let targetTimeStr = null;
+
+  if (state.selectedTripKey) {
+    const trip = dirInfo.trips.find(t => tripKey(t) === state.selectedTripKey);
+    if (trip) targetTimeStr = trip.p;
+  }
+  if (!targetTimeStr) {
+    const visible = tripsSorted(dirInfo.trips).filter(t => tripVisible(t, info));
+    if (visible.length) targetTimeStr = visible[0].p;
+  }
+
+  const viewed = state.viewedDate;
+  const now = new Date();
+  const isToday = dateStr(viewed) === dateStr(now);
+  let searchDate;
+
+  if (targetTimeStr) {
+    const [hh, mm] = targetTimeStr.split(":").map(Number);
+    const target = new Date(viewed.getFullYear(), viewed.getMonth(), viewed.getDate(), hh, mm, 0);
+    searchDate = new Date(target.getTime() - 2 * 60 * 60 * 1000); // 2 ore prima
+    if (isToday && searchDate < now) searchDate = now; // oggi non ha senso cercare nel passato
+  } else {
+    // Nessuna corsa nota per quel giorno/direzione: fallback ragionevole
+    searchDate = isToday ? now : new Date(viewed.getFullYear(), viewed.getMonth(), viewed.getDate(), 6, 0, 0);
+  }
+
+  const params = new URLSearchParams({
+    a: "1", c: "0", w: "0", t: "3,15", aw: "0",
+    d: String(searchDate.getTime()),
+    st: start.text, sa: start.text, slat: start.lat, slng: start.lng,
+    et: end.text, ea: end.text, elat: end.lat, elng: end.lng
+  });
+
+  window.open(`https://tua.mycicero.it/TPWebPortal/it/solutions?${params.toString()}`, "_blank");
+}
+function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
+
+let scolasticoOverride = null;
+
+function getDayInfo(date){
+  const ds = dateStr(date);
+  const dow = date.getDay();
+  const isHoliday = dow===0 || HOLIDAYS.includes(ds);
+  let isScolastico = false;
+  if(!isHoliday){
+    if(scolasticoOverride !== null) isScolastico = scolasticoOverride;
+    else {
+      const inYear = ds>=SCHOOL_YEAR.start && ds<=SCHOOL_YEAR.end;
+      const inBreak = SCHOOL_BREAKS.some(([s,e])=> ds>=s && ds<=e);
+      isScolastico = inYear && !inBreak;
+    }
+  }
+  return {ds, dow, isHoliday, isScolastico};
+}
+
+function loadScolasticoOverride(){
+  try {
+    const r = localStorage.getItem('scolastico-override');
+    if(r) scolasticoOverride = r==="si" ? true : (r==="no" ? false : null);
+  } catch(e){}
+}
+
+function setOverride(v){
+  scolasticoOverride = v==="si" ? true : (v==="no" ? false : null);
+  renderCalBar(); renderAll();
+  try { localStorage.setItem('scolastico-override', v); } catch(e){}
+}
+
+function renderCalBar(){
+  const bar = document.getElementById("calBar");
+  const cur = scolasticoOverride===true ? "si" : (scolasticoOverride===false ? "no" : "auto");
+  bar.querySelectorAll(".calopt").forEach(el=>{ el.classList.toggle("active", el.dataset.v===cur); });
+}
+
+function tripVisible(trip, dayInfo){
+  if(dayInfo.isHoliday) return false;
+  let base = trip.tipo==="FA" ? true : (trip.tipo==="FS" ? dayInfo.isScolastico : !dayInfo.isScolastico);
+  if(!base) return false;
+  return trip.giorno ? trip.giorno(dayInfo.dow) : true;
+}
+
+let state = { route: "ocre", dir: "fromAQ", viewedDate: new Date(), selectedTripKey: null };
+const WD = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+const MO = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+
+/* MAPPA & TRACCIAMENTO STRADALE CON MEMORIA */
+
+// Coordinate dei checkpoint della tratta San Demetrio (fornite dall'utente).
+// NB: "Villa Sant'Angelo" è citata nei percorsi ma non è ancora arrivata una coordinata:
+// finché non la fornisci, il tratto Tussillo-Forno viene calcolato diretto via strada (OSRM),
+// che comunque passa realisticamente vicino a Villa Sant'Angelo.
+const DEMETRIO_CP = {
+  terminal:      { name: "Terminal Collemaggio",        lat: 42.3444,     lng: 13.4009 },
+  cencioni:      { name: "Piazzale Cencioni",           lat: 42.351438,   lng: 13.411938 },
+  bivio_sr5:     { name: "Bivio SR5bis",                lat: 42.3392207,  lng: 13.4093285 },
+  bivio_selia:   { name: "Bivio Sant'Elia",             lat: 42.3373686,  lng: 13.4164779 },
+  bazzano1:      { name: "Bazzano 1",                   lat: 42.3367825,  lng: 13.4531896 },
+  bazzano2:      { name: "Bazzano 2",                   lat: 42.3368447,  lng: 13.4581014 },
+  paganica:      { name: "Stazione Paganica",           lat: 42.335188,   lng: 13.464688 },
+  onna:          { name: "Onna",                        lat: 42.3313742,  lng: 13.4781801 },
+  sangregorio:   { name: "San Gregorio",                lat: 42.3262801,  lng: 13.4953234 },
+  bivio_eusanio: { name: "Bivio Sant'Eusanio",          lat: 42.2959988,  lng: 13.5345279 },
+  santeusanio:   { name: "Sant'Eusanio Forconese",      lat: 42.289409,   lng: 13.523999 },
+  casentino:     { name: "Casentino",                   lat: 42.282754,   lng: 13.513502 },
+  tussillo:      { name: "Tussillo",                    lat: 42.268167,   lng: 13.532477 },
+  stiffe:        { name: "Stiffe",                      lat: 42.256585,   lng: 13.547842 },
+  stazionesd:    { name: "Stazione San Demetrio",       lat: 42.2947613,  lng: 13.5374076 },
+  paolo:         { name: "Paolobus San Demetrio",       lat: 42.290377,   lng: 13.547565 },
+  forno:         { name: "Forno San Demetrio",          lat: 42.2886153,  lng: 13.5526543 },
+  ufficiopostale:{ name: "Ufficio Postale San Demetrio",lat: 42.2882078,  lng: 13.5581750 }
+};
+
+// Percorso (sequenza di checkpoint) per ciascuna linea/direzione, come indicato dall'utente.
+// "_giro" = variante lunga via Sant'Eusanio-Casentino-Tussillo-Stiffe (corse con giro:true).
+// "toAQ_cencioni" = variante di ritorno che si ferma a Cencioni invece che al Terminal.
+const DEMETRIO_ROUTES = {
+  "2059": {
+    fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","bazzano2","cencioni","terminal"]
+  },
+  "2058": {
+    fromAQ: ["terminal","cencioni","bazzano2","paganica","onna","sangregorio","bivio_eusanio","forno","ufficiopostale"]
+    // Nessuna corsa di ritorno nota per questa linea.
+  },
+  "2064": {
+    fromAQ:       ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    fromAQ_giro:  ["terminal","cencioni","paganica","onna","sangregorio","bivio_eusanio","santeusanio","casentino","tussillo","stiffe","tussillo","forno","ufficiopostale"],
+    toAQ:          ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"],
+    toAQ_cencioni: ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni"]
+  },
+  "2046": {
+    fromAQ: ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"]
+  },
+  "2005": {
+    fromAQ: ["terminal","bivio_sr5","bivio_selia","bazzano1","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    toAQ:   ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","bazzano1","bivio_selia","bivio_sr5","terminal"]
+  },
+  "2001": {
+    fromAQ:      ["terminal","cencioni","paganica","onna","sangregorio","stazionesd","paolo","forno","ufficiopostale"],
+    fromAQ_giro: ["terminal","paganica","onna","sangregorio","bivio_eusanio","santeusanio","casentino","tussillo","stiffe","tussillo","forno","ufficiopostale"],
+    toAQ:        ["ufficiopostale","forno","paolo","stazionesd","sangregorio","onna","paganica","cencioni","terminal"]
+  }
+  // "2008": nessun percorso dettagliato fornito -> fallback al tragitto diretto via strada.
+};
+
+function getDemetrioRouteKeys(linea, dir, trip) {
+  const lineRoutes = DEMETRIO_ROUTES[linea];
+  if (!lineRoutes) return null;
+  if (dir === "fromAQ") {
+    if (trip && trip.giro && lineRoutes.fromAQ_giro) return lineRoutes.fromAQ_giro;
+    return lineRoutes.fromAQ || null;
+  } else {
+    if (trip && trip.stopsAtCencioni && lineRoutes.toAQ_cencioni) return lineRoutes.toAQ_cencioni;
+    return lineRoutes.toAQ || null;
+  }
+}
+
+let map = null, depMarker = null, arrMarker = null, userMarker = null, watchGpsId = null;
+let fullRoutePolyline = null, passedPolyline = null, cpMarkers = [];
+let osrmFullCoords = [];   // Punti geodetichi completi da OSRM
+let routeCumDist = [];     // Distanza cumulativa (metri) lungo osrmFullCoords, stesso indice
+let secondToLastRouteIdx = null; // Indice sul tracciato del penultimo checkpoint (quello prima dell'arrivo)
+let lastPassedCPIndex = -1; // usato solo per i checkpoint etichettati
+let lastCutIndex = 0;       // indice sul tracciato OSRM fino a cui colorare di verde (avanzamento continuo)
+let stopAlertTriggered = false;
+let trackingActive = false; // true quando l'utente ha fissato una corsa e attivato l'alert
+let wakeLockRef = null;
+
+const ALERT_DISTANCE_METERS = 200;      // soglia di prossimità diretta alla fermata di arrivo
+const AFTER_PENULTIMATE_MARGIN = 250;   // metri percorsi oltre il penultimo checkpoint prima di avvisare
+const ARRIVED_DISTANCE_METERS = 60;     // sotto questa distanza si considera "arrivato" e si ferma il tracking
+
+function createDivIcon(className, text) {
+  return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+}
+
+// Livello mappa "intelligente": se il file è la versione offline con le tile già incorporate
+// (window.__OFFLINE_TILE_DATA__), le usa direttamente senza rete; altrimenti scarica le tile
+// normalmente da OpenStreetMap (comportamento identico a prima quando c'è connessione).
+function createTileLayer(){
+  const tileData = window.__OFFLINE_TILE_DATA__;
+  if (tileData) {
+    const OfflineTileLayer = L.TileLayer.extend({
+      getTileUrl: function(coords){
+        const key = `${coords.z}/${coords.x}/${coords.y}`;
+        return tileData[key] || ""; // vuoto = tile non incorporata, resta bianca
+      }
+    });
+    return new OfflineTileLayer("", { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
+  }
+  return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  });
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  createTileLayer().addTo(map);
+
+  updateMapMarkers();
+  startContinuousTracking(); // Tracciamento automatico all'apertura
+}
+
+function selectedOrNextTrip() {
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  if (state.selectedTripKey) {
+    const t = dirInfo.trips.find(t => tripKey(t) === state.selectedTripKey);
+    if (t) return t;
+  }
+  const found = findNextDeparture();
+  return found ? found.trip : null;
+}
+
+function currentViaPoints() {
+  // Restituisce l'elenco di via-points (checkpoint) nell'ordine di marcia corrente, oppure null
+  // se per la tratta/linea/corsa selezionata non ne abbiamo di definiti (in tal caso si traccia
+  // solo il percorso diretto partenza-arrivo via strada).
+  if (state.route === "ocre") {
+    return state.dir === "fromAQ" ? OCRE_CHECKPOINTS : [...OCRE_CHECKPOINTS].reverse();
+  }
+  if (state.route === "demetrio") {
+    const trip = selectedOrNextTrip();
+    if (!trip) return null;
+    const keys = getDemetrioRouteKeys(trip.linea, state.dir, trip);
+    if (!keys) return null;
+    return keys.map((k, idx) => {
+      const cp = DEMETRIO_CP[k];
+      return { id: idx, name: cp.name, lat: cp.lat, lng: cp.lng };
+    });
+  }
+  return null;
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
+  const pf = document.getElementById('progressFill'); if (pf) pf.style.width = "0%";
+
+  const { dep, arr } = getRouteCoords();
+  const trip = selectedOrNextTrip();
+  const depTimeLabel = trip ? trip.p : "";
+  const arrTimeLabel = trip ? trip.a : "";
+  const routeColor = state.route === "ocre" ? "var(--route-ocre)" : "var(--route-demetrio)";
+  const timesPart = (depTimeLabel && arrTimeLabel) ? ` <span class="map-title-times">(${depTimeLabel} → ${arrTimeLabel})</span>` : "";
+  document.getElementById('mapTitle').innerHTML = `<span class="tab-dot" style="background:${routeColor}"></span>${dep.shortLabel || dep.label} → ${arr.shortLabel || arr.label}${timesPart}`;
+
+  const depTooltip = `<b>${dep.shortLabel || dep.label}</b>${depTimeLabel ? ` · ${depTimeLabel}` : ""}`;
+  const arrTooltip = `<b>${arr.shortLabel || arr.label}</b>${arrTimeLabel ? ` · ${arrTimeLabel}` : ""}`;
+
+  if (depMarker) { depMarker.setLatLng([dep.lat, dep.lng]); depMarker.setTooltipContent(depTooltip); }
+  else {
+    depMarker = L.marker([dep.lat, dep.lng], { icon: createDivIcon('pin-dep', 'P') }).addTo(map);
+    depMarker.bindTooltip(depTooltip, { permanent: true, direction: 'top', offset: [0, -12], className: 'stop-tooltip stop-tooltip-dep' });
+  }
+  depMarker.bindPopup(`<b>Partenza ${depTimeLabel}:</b><br>${dep.label}`);
+
+  if (arrMarker) { arrMarker.setLatLng([arr.lat, arr.lng]); arrMarker.setTooltipContent(arrTooltip); }
+  else {
+    arrMarker = L.marker([arr.lat, arr.lng], { icon: createDivIcon('pin-arr', 'A') }).addTo(map);
+    arrMarker.bindTooltip(arrTooltip, { permanent: true, direction: 'bottom', offset: [0, 12], className: 'stop-tooltip stop-tooltip-arr' });
+  }
+  arrMarker.bindPopup(`<b>Arrivo ${arrTimeLabel}:</b><br>${arr.label}`);
+
+  redrawCpMarkers();
+  fetchOSRMRoute(); // chiamata di rete: solo qui, al cambio di corsa/tratta/direzione
+
+  if (!trackingActive) fitMapBounds();
+}
+
+// Ridisegna solo i marcatori dei checkpoint (nessuna chiamata di rete): sicuro da richiamare
+// spesso, ad esempio ogni volta che si supera un checkpoint durante il tracking.
+function redrawCpMarkers() {
+  cpMarkers.forEach(m => map.removeLayer(m));
+  cpMarkers = [];
+  const viaPoints = currentViaPoints();
+  if (viaPoints) {
+    const lastIdx = viaPoints.length - 1;
+    viaPoints.forEach((cp, idx) => {
+      if (idx === 0 || idx === lastIdx) return; // salta partenza/arrivo, già marcati sopra
+      const passedClass = idx <= lastPassedCPIndex ? 'passed' : '';
+      const m = L.marker([cp.lat, cp.lng], {
+        icon: createDivIcon(`pin-cp ${passedClass}`, cp.id ?? idx)
+      }).bindPopup(`<b>Checkpoint:</b> ${cp.name}`).addTo(map);
+      cpMarkers.push(m);
+    });
+  }
+}
+
+let osrmRequestToken = 0;
+
+// Chiave di cache locale (localStorage) per una geometria di percorso, in base ai via-point esatti.
+function osrmCacheKey(coordsStr){ return 'osrm:' + coordsStr; }
+
+function loadOsrmFromLocalCache(coordsStr){
+  try {
+    const raw = localStorage.getItem(osrmCacheKey(coordsStr));
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function saveOsrmToLocalCache(coordsStr, coordinates){
+  try { localStorage.setItem(osrmCacheKey(coordsStr), JSON.stringify(coordinates)); } catch(e) {}
+}
+
+async function fetchOSRMRoute() {
+  const myToken = ++osrmRequestToken;
+  try {
+    const { dep, arr } = getRouteCoords();
+    const viaPoints = currentViaPoints();
+    const coordsList = viaPoints
+      ? viaPoints.map(cp => `${cp.lng},${cp.lat}`)
+      : [`${dep.lng},${dep.lat}`, `${arr.lng},${arr.lat}`];
+    const coordsStr = coordsList.join(';');
+
+    // 1) Se il percorso è già stato scaricato (pulsante "Modalità offline"), usiamo subito
+    //    quello: funziona identico online e offline, nessuna chiamata di rete necessaria.
+    let coordinates = loadOsrmFromLocalCache(coordsStr);
+
+    // 2) Altrimenti proviamo a scaricarlo ora dalla rete (se disponibile).
+    if (!coordinates) {
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (myToken !== osrmRequestToken) return;
+      if (data.routes && data.routes.length > 0) {
+        coordinates = data.routes[0].geometry.coordinates;
+        saveOsrmToLocalCache(coordsStr, coordinates);
+      }
+    }
+
+    if (myToken !== osrmRequestToken) return;
+
+    if (coordinates) {
+      osrmFullCoords = coordinates.map(c => [c[1], c[0]]);
+      computeCumulativeDistances();
+      computeViaPointIndices(viaPoints);
+      redrawRoutePolylines();
+    }
+  } catch(e) {
+    // Offline e nessuna cache disponibile per questa corsa: niente polyline, ma l'app
+    // (orari, GPS, checkpoint se noti) resta comunque utilizzabile.
+    console.log("Errore OSRM Route (probabile assenza di rete):", e);
+  }
+}
+
+function computeCumulativeDistances() {
+  routeCumDist = [0];
+  for (let i = 1; i < osrmFullCoords.length; i++) {
+    const d = getDistanceMeters(osrmFullCoords[i-1][0], osrmFullCoords[i-1][1], osrmFullCoords[i][0], osrmFullCoords[i][1]);
+    routeCumDist.push(routeCumDist[i-1] + d);
+  }
+}
+
+// Calcola, per ogni checkpoint del percorso, l'indice del punto più vicino sul tracciato OSRM.
+// La ricerca è sequenziale (ogni checkpoint cercato solo DOPO il precedente sul tracciato):
+// evita ambiguità quando due fermate sono ravvicinate o quando il percorso si ripiega su se
+// stesso (es. Tussillo-Stiffe-Tussillo), casi in cui una ricerca "più vicino in assoluto"
+// potrebbe agganciarsi al punto sbagliato.
+let viaPointRouteIdx = []; // [{cp, idx}] in ordine di marcia
+
+function computeViaPointIndices(viaPoints) {
+  viaPointRouteIdx = [];
+  secondToLastRouteIdx = null;
+  if (!viaPoints || viaPoints.length === 0 || osrmFullCoords.length === 0) return;
+  let searchFrom = 0;
+  viaPoints.forEach(cp => {
+    const idx = nearestRouteIndexInRange(cp.lat, cp.lng, searchFrom, osrmFullCoords.length - 1, Infinity);
+    if (idx !== null) {
+      viaPointRouteIdx.push({ cp, idx });
+      searchFrom = idx; // il checkpoint successivo va cercato solo più avanti sul tracciato
+    }
+  });
+  if (viaPointRouteIdx.length >= 2) {
+    secondToLastRouteIdx = viaPointRouteIdx[viaPointRouteIdx.length - 2].idx;
+  }
+}
+
+function redrawRoutePolylines() {
+  if (!map || osrmFullCoords.length === 0) return;
+
+  if (fullRoutePolyline) map.removeLayer(fullRoutePolyline);
+  if (passedPolyline) map.removeLayer(passedPolyline);
+
+  const cutIndex = Math.min(lastCutIndex, osrmFullCoords.length - 1);
+
+  if (cutIndex > 0) {
+    const passedCoords = osrmFullCoords.slice(0, cutIndex + 1);
+    passedPolyline = L.polyline(passedCoords, { color: '#4fa88f', weight: 5, opacity: 0.9 }).addTo(map);
+  }
+
+  const remainingCoords = osrmFullCoords.slice(cutIndex);
+  fullRoutePolyline = L.polyline(remainingCoords, { color: '#3b82f6', weight: 5, opacity: 0.9 }).addTo(map);
+
+  updateProgressBar(cutIndex);
+}
+
+function updateProgressBar(cutIndex) {
+  const fill = document.getElementById('progressFill');
+  if (!fill) return;
+  const total = routeCumDist.length ? routeCumDist[routeCumDist.length - 1] : 0;
+  if (!total) { fill.style.width = "0%"; return; }
+  const pct = Math.max(0, Math.min(100, (routeCumDist[Math.min(cutIndex, routeCumDist.length - 1)] / total) * 100));
+  fill.style.width = `${pct}%`;
+}
+
+// Cerca il punto del tracciato più vicino a una coordinata, SOLO nell'intervallo [fromIdx, toIdx].
+function nearestRouteIndexInRange(lat, lng, fromIdx, toIdx, maxDist) {
+  if (osrmFullCoords.length === 0) return null;
+  let minD = Infinity, minI = -1;
+  const start = Math.max(0, fromIdx), end = Math.min(toIdx, osrmFullCoords.length - 1);
+  for (let i = start; i <= end; i++) {
+    const d = getDistanceMeters(lat, lng, osrmFullCoords[i][0], osrmFullCoords[i][1]);
+    if (d < minD) { minD = d; minI = i; }
+  }
+  return minD <= maxDist ? minI : null;
+}
+
+// Posizione GPS live: cerca solo in una finestra intorno al punto già raggiunto, per non
+// "saltare" erroneamente su un punto geograficamente vicino ma in realtà più avanti/indietro
+// sul tracciato (stesso motivo dei percorsi che si ripiegano su se stessi).
+function nearestRouteIndex(lat, lng, maxDist = 450) {
+  const from = Math.max(0, lastCutIndex - 25);
+  return nearestRouteIndexInRange(lat, lng, from, osrmFullCoords.length - 1, maxDist);
+}
+
+function getRouteCoords() {
+  let dep, arr;
+  if (state.route === "ocre") {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.ocre : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.ocre;
+  } else {
+    dep = state.dir === "toAQ" ? STOPS_COORDS.demetrio : STOPS_COORDS.laquila;
+    arr = state.dir === "toAQ" ? STOPS_COORDS.laquila : STOPS_COORDS.demetrio;
+
+    // Alcune corse di ritorno (es. 2064 delle 8:40) non arrivano al Terminal:
+    // l'arrivo reale, sia per la mappa che per l'alert di prossimità, è Cencioni.
+    if (state.dir === "toAQ") {
+      const trip = selectedOrNextTrip();
+      if (trip && trip.stopsAtCencioni) {
+        arr = { lat: DEMETRIO_CP.cencioni.lat, lng: DEMETRIO_CP.cencioni.lng, label: "Cencioni (cimitero)", shortLabel: "Cencioni" };
+      }
+    }
+  }
+  return { dep, arr };
+}
+
+function fitMapBounds() {
+  if (!map) return;
+  const points = [];
+  if (depMarker) points.push(depMarker.getLatLng());
+  if (arrMarker) points.push(arrMarker.getLatLng());
+  if (userMarker) points.push(userMarker.getLatLng());
+  if (points.length > 0) map.fitBounds(L.latLngBounds(points), { padding: [35, 35] });
+}
+
+function getDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const f1 = lat1 * Math.PI/180, f2 = lat2 * Math.PI/180;
+  const df = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(df/2)*Math.sin(df/2) + Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)*Math.sin(dl/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function startContinuousTracking() {
+  if (!navigator.geolocation) return;
+  if (watchGpsId !== null) navigator.geolocation.clearWatch(watchGpsId);
+
+  watchGpsId = navigator.geolocation.watchPosition(
+    updateUserLocation,
+    err => {
+      const badge = document.getElementById('locStatusBadge');
+      badge.textContent = "GPS Disattivato";
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+  );
+}
+
+function updateUserLocation(pos) {
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+  const userCoords = [lat, lng];
+
+  if (userMarker) userMarker.setLatLng(userCoords);
+  else {
+    userMarker = L.marker(userCoords, {
+      icon: L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin pin-user"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] })
+    }).bindPopup("<b>La tua Posizione</b>").addTo(map);
+  }
+
+  const badge = document.getElementById('locStatusBadge');
+  badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
+  badge.style.color = "var(--green)";
+
+  // Tutto il resto (avanzamento, barra di progresso, checkpoint, autozoom, alert) dipende
+  // dal tracking: se non hai premuto "Attiva Alert" restiamo solo a mostrare il tuo puntino.
+  if (!trackingActive) return;
+
+  // Avanzamento continuo lungo il tracciato stradale (funziona per qualsiasi tratta, con o senza checkpoint)
+  const nearIdx = nearestRouteIndex(lat, lng);
+  if (nearIdx !== null && nearIdx > lastCutIndex) {
+    lastCutIndex = nearIdx;
+    redrawRoutePolylines();
+  }
+
+  // Autozoom "da navigatore": durante il tracking, la mappa segue tenendo d'occhio
+  // l'ultima fermata passata, la tua posizione e le prossime 2-3 fermate.
+  updateNavigatorView(userCoords);
+
+  // Aggiorna lo stato "passato" dei checkpoint etichettati, se presenti per questa tratta/linea
+  const viaPoints = currentViaPoints();
+  if (viaPoints) {
+    viaPoints.forEach((cp, idx) => {
+      if (idx === 0 || idx === viaPoints.length - 1) return;
+      const dist = getDistanceMeters(lat, lng, cp.lat, cp.lng);
+      if (dist < 200 && idx > lastPassedCPIndex) {
+        lastPassedCPIndex = idx;
+        redrawCpMarkers();
+      }
+    });
+  }
+
+  const { arr } = getRouteCoords();
+  const distToArr = getDistanceMeters(lat, lng, arr.lat, arr.lng);
+
+  // Arrivo rilevato: il tracking si ferma da solo
+  if (distToArr < ARRIVED_DISTANCE_METERS) {
+    stopTracking(false);
+    return;
+  }
+
+  if (!stopAlertTriggered) {
+    // 1) Prossimità diretta alla fermata di arrivo
+    if (distToArr < ALERT_DISTANCE_METERS) {
+      triggerStopNotification(arr.label, "vicino");
+    }
+    // 2) La penultima fermata è già stata superata da un po': la prossima è la tua
+    else if (secondToLastRouteIdx !== null && lastCutIndex >= secondToLastRouteIdx) {
+      const cur = routeCumDist[Math.min(lastCutIndex, routeCumDist.length - 1)] || 0;
+      const atPenultimate = routeCumDist[Math.min(secondToLastRouteIdx, routeCumDist.length - 1)] || 0;
+      const totalLastLeg = (routeCumDist[routeCumDist.length - 1] || 0) - atPenultimate;
+      // Se le ultime due fermate sono ravvicinate, il margine non deve superare metà del tragitto residuo:
+      // altrimenti rischieremmo di "saltare" l'avviso perché si arriva prima di raggiungere il margine fisso.
+      const effectiveMargin = Math.min(AFTER_PENULTIMATE_MARGIN, totalLastLeg * 0.5);
+      if ((cur - atPenultimate) >= effectiveMargin) {
+        triggerStopNotification(arr.label, "penultima");
+      }
+    }
+  }
+}
+
+let stopAlertVibrateInterval = null;
+
+let lastNavigatorFitAt = 0;
+
+// Inquadra la mappa come un navigatore: ultima fermata passata, posizione attuale e prossime 2-3 fermate.
+function updateNavigatorView(userCoords) {
+  if (!map) return;
+
+  const now = Date.now();
+  if (now - lastNavigatorFitAt < 4000) return; // non troppo spesso, per fluidità
+  lastNavigatorFitAt = now;
+
+  const points = [userCoords];
+
+  if (viaPointRouteIdx.length > 0) {
+    let lastPassed = null, upcoming = [];
+    viaPointRouteIdx.forEach(v => {
+      if (v.idx <= lastCutIndex) lastPassed = v;
+      else if (upcoming.length < 3) upcoming.push(v);
+    });
+    if (lastPassed) points.push([lastPassed.cp.lat, lastPassed.cp.lng]);
+    upcoming.forEach(v => points.push([v.cp.lat, v.cp.lng]));
+  } else {
+    // Nessun checkpoint per questa linea: inquadra almeno utente e arrivo
+    const { arr } = getRouteCoords();
+    points.push([arr.lat, arr.lng]);
+  }
+
+  if (points.length < 2) {
+    map.flyTo(userCoords, 15, { duration: 1 });
+    return;
+  }
+
+  map.flyToBounds(L.latLngBounds(points), { padding: [50, 50], maxZoom: 16, duration: 1 });
+}
+
+function triggerStopNotification(stopLabel, reason) {
+  stopAlertTriggered = true;
+
+  const title = "🔔 RICHIEDI FERMATA!";
+  const msg = reason === "penultima"
+    ? `Hai già superato la fermata precedente da un po': la prossima è ${stopLabel}. Premi il pulsante prenotazione!`
+    : `Il bus si sta avvicinando a ${stopLabel} (meno di ${ALERT_DISTANCE_METERS}m). Premi il pulsante prenotazione!`;
+
+  // Overlay a schermo intero, lampeggiante, con segnale di stop
+  document.getElementById('stopAlertText').textContent = msg;
+  document.getElementById('stopAlertOverlay').classList.add('show');
+
+  // Vibrazione: scatta subito e si ripete finché non viene chiusa
+  if ("vibrate" in navigator) {
+    navigator.vibrate([1000, 250, 1000, 250, 1000, 250, 1000]);
+    if (stopAlertVibrateInterval) clearInterval(stopAlertVibrateInterval);
+    stopAlertVibrateInterval = setInterval(() => navigator.vibrate([1000, 250, 1000]), 3000);
+  }
+
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, {
+      body: msg,
+      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+      vibrate: [1000, 250, 1000, 250, 1000]
+    });
+  }
+}
+
+function dismissStopAlert() {
+  document.getElementById('stopAlertOverlay').classList.remove('show');
+  if (stopAlertVibrateInterval) { clearInterval(stopAlertVibrateInterval); stopAlertVibrateInterval = null; }
+  if ("vibrate" in navigator) navigator.vibrate(0);
+}
+
+/* TRACKING PERSISTENTE (corsa fissata in primo piano) */
+
+function saveActiveTracking() {
+  try {
+    localStorage.setItem('activeTracking', JSON.stringify({
+      route: state.route, dir: state.dir, tripKey: state.selectedTripKey
+    }));
+  } catch(e) {}
+}
+
+function clearActiveTracking() {
+  try { localStorage.removeItem('activeTracking'); } catch(e) {}
+}
+
+function loadActiveTrackingOnInit() {
+  try {
+    const raw = localStorage.getItem('activeTracking');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && data.route && ROUTES[data.route]) {
+      state.route = data.route;
+      state.dir = data.dir || "fromAQ";
+      state.selectedTripKey = data.tripKey || null;
+      trackingActive = true;
+    }
+  } catch(e) {}
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      wakeLockRef.addEventListener('release', () => { wakeLockRef = null; });
+    }
+  } catch(e) { console.log("Wake Lock non disponibile:", e); }
+}
+
+function releaseWakeLock() {
+  if (wakeLockRef) { wakeLockRef.release().catch(()=>{}); wakeLockRef = null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (trackingActive && document.visibilityState === 'visible' && wakeLockRef === null) {
+    requestWakeLock();
+  }
+});
+
+function updateTrackButtonUI() {
+  const btn = document.getElementById('trackBtn');
+  if (!btn) return;
+  btn.textContent = trackingActive ? "FERMA AVVISO" : "AVVISAMI";
+  btn.classList.toggle("tracking", trackingActive);
+}
+
+function toggleTracking() {
+  if (trackingActive) { stopTracking(true); return; }
+
+  if (!state.selectedTripKey) {
+    const found = findNextDeparture();
+    if (found) state.selectedTripKey = tripKey(found.trip);
+  }
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+  // Vibrazione breve di conferma: partendo da un tap (gesto utente) alcuni browser/webview
+  // richiedono proprio questo per "sbloccare" la vibrazione anche per gli alert successivi.
+  if ("vibrate" in navigator) navigator.vibrate(80);
+
+  trackingActive = true;
+  stopAlertTriggered = false;
+  saveActiveTracking();
+  requestWakeLock();
+  renderNextCard(); renderTripList(); renderSelectedCard(); updateTrackButtonUI();
+}
+
+function stopTracking(manual) {
+  trackingActive = false;
+  clearActiveTracking();
+  releaseWakeLock();
+  updateTrackButtonUI();
+  renderNextCard(); renderTripList(); renderSelectedCard();
+  if (map) fitMapBounds();
+  if (!manual) {
+    alert("🎉 Sei arrivato a destinazione! Il tracking si è fermato automaticamente.");
+  }
+}
+
+/* SALVA PAGINA OFFLINE: genera un unico file .html autonomo, con dentro tutti i percorsi
+   già calcolati e la libreria mappa inclusa, scaricabile sul telefono e apribile senza rete.
+   Le tile stradali (immagini di sfondo della mappa) restano "solo se c'è rete": OpenStreetMap
+   non permette di scaricarle in blocco e comunque il tracciamento (GPS, percorso, allarme
+   fermata) funziona a prescindere, disegnando la linea del percorso anche a schermo vuoto. */
+
+// Tutte le combinazioni linea/direzione (con relativi via-point) i cui percorsi vanno
+// scaricati da OSRM: le stesse liste usate da currentViaPoints()/fetchOSRMRoute() a runtime.
+function buildAllRouteCombos(){
+  const combos = [];
+  combos.push(OCRE_CHECKPOINTS.map(cp => ({ lat: cp.lat, lng: cp.lng })));
+  combos.push([...OCRE_CHECKPOINTS].reverse().map(cp => ({ lat: cp.lat, lng: cp.lng })));
+
+  Object.values(DEMETRIO_ROUTES).forEach(dirs => {
+    Object.values(dirs).forEach(keys => {
+      combos.push(keys.map(k => ({ lat: DEMETRIO_CP[k].lat, lng: DEMETRIO_CP[k].lng })));
+    });
+  });
+
+  // Percorsi diretti di riserva (linee/direzioni senza via-point noti, es. 2008, 2058 di ritorno):
+  // l'app in quel caso chiede a OSRM solo partenza-arrivo diretti.
+  combos.push([STOPS_COORDS.laquila, STOPS_COORDS.demetrio]);
+  combos.push([STOPS_COORDS.demetrio, STOPS_COORDS.laquila]);
+  combos.push([STOPS_COORDS.laquila, STOPS_COORDS.ocre]);
+  combos.push([STOPS_COORDS.ocre, STOPS_COORDS.laquila]);
+
+  return combos;
+}
+
+async function downloadAllRoutes(onProgress){
+  const combos = buildAllRouteCombos();
+  let done = 0;
+  for (const points of combos) {
+    const coordsStr = points.map(p => `${p.lng},${p.lat}`).join(';');
+    if (!loadOsrmFromLocalCache(coordsStr)) {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          saveOsrmToLocalCache(coordsStr, data.routes[0].geometry.coordinates);
+        }
+      } catch(e) { console.log("Percorso non scaricato (offline?):", e); }
+    }
+    done++;
+    if (onProgress) onProgress(done, combos.length);
+  }
+  return combos;
+}
+
+// Raccoglie tutte le geometrie dei percorsi già scaricate (chiavi localStorage "osrm:...")
+// in un unico oggetto {coordsStr: coordinates} da incorporare nel file offline.
+function collectAllCachedRoutes(){
+  const out = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('osrm:')) {
+      try { out[key.slice(5)] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+    }
+  }
+  return out;
+}
+
+// Zoom coperti dalle tile incorporate: dallo zoom iniziale della mappa (11) fino al massimo
+// usato durante il tracciamento in navigazione (16).
+const OFFLINE_ZOOM_MIN = 12, OFFLINE_ZOOM_MAX = 16;
+
+function lon2tileX(lon, z){ return Math.floor((lon + 180) / 360 * Math.pow(2, z)); }
+function lat2tileY(lat, z){
+  const r = lat * Math.PI / 180;
+  return Math.floor((1 - Math.log(Math.tan(r) + 1/Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z));
+}
+
+function buildTileListForCombos(combos){
+  let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+  combos.forEach(points => points.forEach(p => {
+    if (p.lat < minLat) minLat = p.lat;
+    if (p.lat > maxLat) maxLat = p.lat;
+    if (p.lng < minLng) minLng = p.lng;
+    if (p.lng > maxLng) maxLng = p.lng;
+  }));
+  const buf = 0.015; // margine attorno ai corridoi, per un minimo di contesto sulla mappa
+  minLat -= buf; maxLat += buf; minLng -= buf; maxLng += buf;
+
+  const tiles = [];
+  for (let z = OFFLINE_ZOOM_MIN; z <= OFFLINE_ZOOM_MAX; z++) {
+    const xMin = lon2tileX(minLng, z), xMax = lon2tileX(maxLng, z);
+    const yMin = lat2tileY(maxLat, z), yMax = lat2tileY(minLat, z); // lat invertita
+    for (let x = xMin; x <= xMax; x++) {
+      for (let y = yMin; y <= yMax; y++) tiles.push({ z, x, y });
+    }
+  }
+  return tiles;
+}
+
+function blobToDataURL(blob){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Scarica ogni tile come immagine e la converte in una stringa incorporabile direttamente
+// nell'HTML (nessuna richiesta di rete quando poi apri il file offline). Le tile che
+// falliscono (es. server irraggiungibile) vengono semplicemente saltate: il resto del file
+// (orari, percorsi, allarme) si genera comunque.
+async function downloadAllTilesAsDataUrls(onProgress){
+  const combos = buildAllRouteCombos();
+  const tiles = buildTileListForCombos(combos);
+  const out = {};
+  let done = 0;
+  const concurrency = 4;
+  let idx = 0;
+
+  async function worker(){
+    while (idx < tiles.length) {
+      const t = tiles[idx++];
+      const url = `https://tile.openstreetmap.org/${t.z}/${t.x}/${t.y}.png`;
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const blob = await res.blob();
+          out[`${t.z}/${t.x}/${t.y}`] = await blobToDataURL(blob);
+        }
+      } catch(e) { /* singola tile non scaricata: si prosegue con le altre */ }
+      done++;
+      if (onProgress) onProgress(done, tiles.length);
+    }
+  }
+
+  await Promise.all(Array.from({length: concurrency}, worker));
+  return out;
+}
+
+async function buildStandaloneOfflineHtml(onTileProgress){
+  // Libreria Leaflet incorporata (altrimenti, senza rete, la mappa non potrebbe caricarla da CDN).
+  const [leafletCss, leafletJs] = await Promise.all([
+    fetch("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css").then(r => r.text()),
+    fetch("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js").then(r => r.text())
+  ]);
+
+  const routeData = collectAllCachedRoutes();
+  const tileData = await downloadAllTilesAsDataUrls(onTileProgress);
+
+  const seedScript =
+    `<script id="offline-seed">\n` +
+    `(function(){\n` +
+    `  var ROUTE_DATA = ${JSON.stringify(routeData)};\n` +
+    `  Object.keys(ROUTE_DATA).forEach(function(k){\n` +
+    `    try { localStorage.setItem('osrm:'+k, JSON.stringify(ROUTE_DATA[k])); } catch(e){}\n` +
+    `  });\n` +
+    `  window.__OFFLINE_TILE_DATA__ = ${JSON.stringify(tileData)};\n` +
+    `  window.__OFFLINE_BUNDLE__ = true;\n` +
+    `})();\n` +
+    `<\/script>`;
+
+  // Cloniamo la pagina così com'è ora (stessa struttura, stessi script applicativi) e
+  // sostituiamo solo i riferimenti esterni con le versioni incorporate.
+  let html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+  html = html.replace(
+    /<link rel="stylesheet" href="https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.css"\s*\/?>/,
+    `<style>${leafletCss}</style>`
+  );
+  html = html.replace(
+    /<script src="https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.js"><\/script>/,
+    `<script>${leafletJs}<\/script>`
+  );
+  // Il service worker non funziona aprendo un file dal telefono (richiede un sito https):
+  // lo togliamo per evitare errori inutili in console nel file offline.
+  html = html.replace(
+    /<script>\s*if \('serviceWorker' in navigator\)[\s\S]*?<\/script>/,
+    ""
+  );
+  // Inseriamo il seed dei percorsi appena prima dello script principale dell'app.
+  html = html.replace('<script>\n/* COORDINATE CHECKPOINT', seedScript + '\n<script>\n/* COORDINATE CHECKPOINT');
+
+  return html;
+}
+
+function triggerHtmlDownload(html, filename){
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function setOfflineUI(state, text){
+  const btn = document.getElementById('offlineBtn');
+  const sub = document.getElementById('offlineSub');
+  const track = document.getElementById('offlineProgressTrack');
+  const status = document.getElementById('offlineStatus');
+  if (!btn) return;
+
+  btn.classList.remove('busy', 'ready');
+  if (state === 'busy') { btn.classList.add('busy'); btn.textContent = "In corso…"; track.style.display = 'block'; }
+  else if (state === 'ready') { btn.classList.add('ready'); btn.textContent = "Rigenera"; track.style.display = 'none'; }
+  else { btn.textContent = "Scarica"; track.style.display = 'none'; }
+
+  if (text !== undefined) status.textContent = text;
+
+  try {
+    const savedAt = localStorage.getItem('offlineDataSavedAt');
+    if (state !== 'busy' && savedAt) {
+      const d = new Date(parseInt(savedAt, 10));
+      sub.textContent = `Ultimo file generato: ${pad(d.getDate())}/${pad(d.getMonth()+1)} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } else if (state !== 'busy') {
+      sub.textContent = "Include orari, percorsi e mappa: apribile senza rete";
+    }
+  } catch(e) {}
+}
+
+async function startOfflineDownload(){
+  const btn = document.getElementById('offlineBtn');
+  if (btn.classList.contains('busy')) return;
+
+  if (!navigator.onLine) {
+    setOfflineUI('idle', "Sei offline: connettiti a internet e riprova a generare il file.");
+    return;
+  }
+
+  setOfflineUI('busy', "Scarico i percorsi di tutte le linee…");
+  const fill = document.getElementById('offlineProgressFill');
+
+  try {
+    await downloadAllRoutes((done, total) => {
+      fill.style.width = `${Math.round((done/total)*20)}%`; // percorsi = 20% della barra
+      document.getElementById('offlineStatus').textContent = `Percorsi: ${done}/${total}`;
+    });
+
+    document.getElementById('offlineStatus').textContent = "Scarico le immagini della mappa…";
+    const html = await buildStandaloneOfflineHtml((done, total) => {
+      fill.style.width = `${20 + Math.round((done/total)*75)}%`; // tile = 75% della barra
+      document.getElementById('offlineStatus').textContent = `Mappa: ${done}/${total} immagini`;
+    });
+    fill.style.width = "100%";
+
+    triggerHtmlDownload(html, "orari-bus-offline.html");
+
+    localStorage.setItem('offlineDataSavedAt', String(Date.now()));
+    setOfflineUI('ready', "Fatto! Trovi \"orari-bus-offline.html\" nei Download del telefono: aprilo da lì anche senza rete.");
+  } catch(e) {
+    console.log("Errore generazione file offline:", e);
+    setOfflineUI('idle', "Generazione non riuscita, riprova con una connessione migliore.");
+  }
+}
+
+function initOfflineUI(){
+  const savedAt = localStorage.getItem('offlineDataSavedAt');
+  setOfflineUI(savedAt ? 'ready' : 'idle');
+}
+
+let rssItems = [];
+let currentRssIndex = 0;
+let rssInterval = null;
+
+async function fetchTUARss() {
+  try {
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tuabruzzo.it/rss.xml')}`);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items && data.items.length > 0) {
+      // Mostriamo TUTTE le notizie del feed TUA nel banner in fondo alla pagina (scorrevoli).
+      rssItems = data.items;
+
+      document.getElementById('rssBanner').style.display = 'block';
+      showRssItem(0);
+      if (rssItems.length > 1) startRssCarousel();
+
+      // La notifica push invece resta mirata: solo se l'avviso riguarda davvero le nostre tratte.
+      const keywords = ['2007', 'ocre', 'san panfilo', 'rocca di mezzo', 'san demetrio'];
+      const relevant = rssItems.find(item => {
+        const text = (item.title + " " + item.description).toLowerCase();
+        return keywords.some(kw => text.includes(kw));
+      });
+      if (relevant) notifyRelevantRssItem(relevant);
+    }
+  } catch(e) {
+    console.log("Errore RSS Feed TUA:", e);
+  }
+}
+
+// Notifica a schermo (solo una volta per avviso) quando arriva una news TUA rilevante per le nostre tratte.
+let notifiedRssIds = new Set();
+function notifyRelevantRssItem(item) {
+  const id = item.guid || item.link || item.title;
+  if (!id || notifiedRssIds.has(id)) return;
+  notifiedRssIds.add(id);
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("Avviso TUA per la tua tratta", {
+      body: item.title,
+      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png"
+    });
+  }
+}
+
+function showRssItem(index) {
+  const box = document.getElementById('rssContentBox');
+  if (!box || !rssItems[index]) return;
+  
+  box.classList.add('fade-out');
+  setTimeout(() => {
+    const item = rssItems[index];
+    document.getElementById('rssItemTitle').textContent = item.title;
+    document.getElementById('rssItemDesc').textContent = item.description.replace(/<[^>]*>?/gm, '').substring(0, 110) + '...';
+    box.classList.remove('fade-out');
+  }, 400);
+}
+
+function startRssCarousel() {
+  if (rssInterval) clearInterval(rssInterval);
+  rssInterval = setInterval(() => {
+    currentRssIndex = (currentRssIndex + 1) % rssItems.length;
+    showRssItem(currentRssIndex);
+  }, 5000);
+}
+
+function renderTabs(){
+  const routeTabs = document.getElementById("routeTabs"); routeTabs.innerHTML = "";
+  Object.entries(ROUTES).forEach(([key,r])=>{
+    const el = document.createElement("div");
+    el.className = "tab " + (key==="ocre" ? "route-ocre" : "route-demetrio") + (state.route===key ? " active":"");
+    el.innerHTML = `<span class="tab-dot" style="background:${key==="ocre" ? "var(--route-ocre)" : "var(--route-demetrio)"}"></span> ${r.label}`;
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    routeTabs.appendChild(el);
+  });
+
+  const dirTabs = document.getElementById("dirTabs"); dirTabs.innerHTML = "";
+  Object.entries(ROUTES[state.route].directions).forEach(([key,d])=>{
+    const el = document.createElement("div");
+    el.className = "dirbtn " + (key==="fromAQ" ? "dir-andata" : "dir-ritorno") + (state.dir===key ? " active":"");
+    el.textContent = d.label;
+    el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
+    dirTabs.appendChild(el);
+  });
+}
+
+function renderClockAndChip(){
+  const now = new Date();
+  document.getElementById("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const info = getDayInfo(state.viewedDate);
+  const chip = document.getElementById("daychip");
+  chip.className = "daychip " + (info.isHoliday ? "festivo" : (info.isScolastico ? "scolastico" : "nonscolastico"));
+  document.getElementById("daychipText").innerHTML = `<b>${(dateStr(state.viewedDate)===dateStr(now)?"oggi, ":"")+WD[info.dow]} ${state.viewedDate.getDate()}</b> — ` + (info.isHoliday?"festivo":(info.isScolastico?"scolastico":"non scolastico"));
+}
+
+function tripDuration(trip){ return toMinutes(trip.a)-toMinutes(trip.p); }
+function tripKey(trip){ return `${trip.linea}|${trip.p}|${trip.a}|${trip.tipo}|${trip.nome}`; }
+
+function tripExtrasHtml(trip){
+  let extras = "";
+  if(trip.stopsAtCencioni) extras += `<span class="xbadge arrto">🏁 ARRIVA A CENCIONI, NON AL TERMINAL</span>`;
+  if(trip.giro) extras += `<span class="xbadge giro">⚠️ PERCORSO LUNGO (giro Sant'Eusanio-V.S.Angelo-Stiffe)</span>`;
+  if(trip.cartaceo) extras += `<span class="xbadge cartaceo">🎫 SOLO BIGLIETTO CARTACEO</span>`;
+  if(trip.offApp) extras += `<span class="xbadge offapp">🚫 NON SU APP TUA</span>`;
+  if(trip.note) extras += `<span class="xbadge note">${trip.note}</span>`;
+  return extras;
+}
+
+// Restituisce la fermata di arrivo reale per la corsa: alcune corse (es. 2064 delle 8:40)
+// non arrivano fino al Terminal ma si fermano prima, a Cencioni (zona cimitero).
+function tripArrStopLabel(trip, dirInfo){
+  if(trip && trip.stopsAtCencioni) return `<span style="color:var(--danger); font-weight:700;">Piazzale Cencioni (cimitero) — NON il Terminal!</span>`;
+  return dirInfo.arrStop;
+}
+
+// A parità di orario di partenza, priorità alla corsa che arriva prima (orario di arrivo più basso).
+function tripsSorted(trips){
+  return [...trips].sort((a,b)=> toMinutes(a.p)-toMinutes(b.p) || toMinutes(a.a)-toMinutes(b.a));
+}
+
+function findNextDeparture(){
+  const trips = tripsSorted(ROUTES[state.route].directions[state.dir].trips);
+  const now = new Date();
+  for(let d=0; d<14; d++){
+    const date = addDays(now, d); const info = getDayInfo(date);
+    if(info.isHoliday) continue;
+    for(const trip of trips){
+      if(!tripVisible(trip, info)) continue;
+      const dep = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ...trip.p.split(":").map(Number));
+      if(d===0 && dep<=now) continue;
+      return {trip, date, dep};
+    }
+  }
+  return null;
+}
+
+// Restituisce una stringa leggibile per il conto alla rovescia di una corsa in una data.
+function formatDepartureWhen(trip, date){
+  const now = new Date();
+  const dep = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ...trip.p.split(":").map(Number));
+  const isToday = dateStr(date)===dateStr(now);
+  if(!isToday) return `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  const diffMin = Math.round((dep-now)/60000);
+  if(diffMin > 0) return diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`;
+  const dur = tripDuration(trip);
+  if(diffMin > -dur) return "in viaggio";
+  return "già partita";
+}
+
+function renderNextCard(){
+  const card = document.getElementById("nextCard");
+  if (state.selectedTripKey) { card.style.display = "none"; card.innerHTML = ""; return; }
+  card.style.display = "block";
+  const found = findNextDeparture();
+  if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa nei prossimi giorni.</div>`; return; }
+  const {trip, date} = found;
+  const when = formatDepartureWhen(trip, date);
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  card.innerHTML = `
+    <div class="next-label">PROSSIMA CORSA IN PARTENZA <span class="when-chip">${when}</span></div>
+    <div class="next-main">
+      <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+    </div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b></div>
+  `;
+}
+
+function renderTripList(){
+  const container = document.getElementById("tripList"); container.innerHTML = "";
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const trips = tripsSorted(dirInfo.trips);
+  const info = getDayInfo(state.viewedDate);
+
+  if(info.isHoliday){ container.innerHTML = `<div style="padding:14px; text-align:center; color:var(--text-dim);">Nessuna corsa attiva nei giorni festivi.</div>`; return; }
+
+  const now = new Date();
+  trips.forEach(trip => {
+    if(!tripVisible(trip, info)) return;
+    const isPassed = dateStr(state.viewedDate)===dateStr(now) && toMinutes(trip.p) < (now.getHours()*60+now.getMinutes());
+    const key = tripKey(trip);
+    const el = document.createElement("div");
+    el.className = "trip" + (isPassed ? " passed" : "") + (state.selectedTripKey===key ? " selected" : "");
+    const extras = tripExtrasHtml(trip);
+    el.innerHTML = `
+      <div class="trip-top">
+        <div class="roundel-sm" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+        <div class="trip-times">${trip.p}<span class="arrow">→</span>${trip.a}</div>
+        <div class="badge ${trip.tipo.toLowerCase()}">${trip.tipo}</div>
+      </div>
+      <div class="trip-name">${trip.nome} <span class="trip-duration">(${tripDuration(trip)}m)</span></div>
+      <div class="trip-sub">Da ${dirInfo.depStop} a ${tripArrStopLabel(trip, dirInfo)}</div>
+      ${extras ? `<div class="trip-extra">${extras}</div>` : ""}
+    `;
+    el.onclick = ()=>{
+      if(trackingActive && state.selectedTripKey===key){ stopTracking(true); }
+      state.selectedTripKey = (state.selectedTripKey===key ? null : key);
+      lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false;
+      renderNextCard(); renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();
+    };
+    container.appendChild(el);
+  });
+}
+
+function renderSelectedCard(){
+  const card = document.getElementById("selectedCard");
+  if(!state.selectedTripKey){ card.style.display = "none"; card.innerHTML = ""; return; }
+
+  const dirInfo = ROUTES[state.route].directions[state.dir];
+  const trip = dirInfo.trips.find(t => tripKey(t)===state.selectedTripKey);
+  if(!trip){ card.style.display = "none"; state.selectedTripKey = null; return; }
+
+  const extras = tripExtrasHtml(trip);
+  const when = formatDepartureWhen(trip, state.viewedDate);
+
+  card.style.display = "block";
+  card.style.borderColor = trackingActive ? "var(--danger)" : "var(--amber)";
+  card.innerHTML = `
+    <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; lastPassedCPIndex=-1; lastCutIndex=0; stopAlertTriggered=false; renderNextCard(); renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
+    <div class="selected-label ${trackingActive ? 'tracking' : ''}" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">
+      <span>${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</span>
+      <span class="when-chip">${when}</span>
+    </div>
+    <div class="next-main">
+      <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
+      <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
+    </div>
+    <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b> • ${tripDuration(trip)} min • <span class="badge ${trip.tipo.toLowerCase()}" style="padding:2px 6px;">${trip.tipo}</span></div>
+    ${extras ? `<div class="trip-extra" style="margin-top:8px;">${extras}</div>` : ""}
+    ${trackingActive ? `<div style="margin-top:8px; font-size:11.5px; color:var(--text-dim);">Questa corsa resta fissata finché non arrivi o premi ✕.</div>` : ""}
+  `;
+}
+
+function renderAll(){
+  renderTabs(); renderClockAndChip(); renderNextCard(); renderTripList(); renderSelectedCard();
+  const dl = document.getElementById("dateLabel");
+  const isTodayNow = dateStr(state.viewedDate)===dateStr(new Date());
+  const dowShort = WD[state.viewedDate.getDay()].slice(0,3);
+  dl.innerHTML = isTodayNow
+    ? `Oggi <span class="dow">· ${dowShort} ${state.viewedDate.getDate()} ${MO[state.viewedDate.getMonth()]}</span>`
+    : `${state.viewedDate.getDate()} ${MO[state.viewedDate.getMonth()]} <span class="dow">${dowShort}</span>`;
+}
+
+document.getElementById("prevDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, -1); renderAll(); };
+document.getElementById("nextDay").onclick = ()=>{ state.viewedDate = addDays(state.viewedDate, 1); renderAll(); };
+document.getElementById("calBar").querySelectorAll(".calopt").forEach(el=>{ el.onclick = ()=> setOverride(el.dataset.v); });
+
+setInterval(renderClockAndChip, 30000);
+loadActiveTrackingOnInit();
+loadScolasticoOverride();
+renderCalBar();
+renderAll(); initMap(); fetchTUARss(); updateTrackButtonUI(); initOfflineUI();
+if (trackingActive) requestWakeLock();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "Orari Bus San Demetrio / San Panfilo ⇄ L'Aquila",
+  "short_name": "Orari Bus",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c1016",
+  "theme_color": "#0c1016",
+  "orientation": "portrait",
+  "icons": []
+}
