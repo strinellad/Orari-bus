@@ -400,8 +400,8 @@
   <div class="offline-card">
     <div class="offline-row">
       <div>
-        <div class="offline-title">📥 Modalità offline</div>
-        <div class="offline-sub" id="offlineSub">Scarica percorsi e mappa per usarli senza rete</div>
+        <div class="offline-title">💾 Salva pagina offline</div>
+        <div class="offline-sub" id="offlineSub">Include orari, percorsi e mappa: apribile senza rete</div>
       </div>
       <button class="offline-btn" id="offlineBtn" onclick="startOfflineDownload()">Scarica</button>
     </div>
@@ -773,14 +773,31 @@ function createDivIcon(className, text) {
   return L.divIcon({ className: 'custom-div-icon', html: `<div class="map-pin ${className}">${text}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
+// Livello mappa "intelligente": se il file è la versione offline con le tile già incorporate
+// (window.__OFFLINE_TILE_DATA__), le usa direttamente senza rete; altrimenti scarica le tile
+// normalmente da OpenStreetMap (comportamento identico a prima quando c'è connessione).
+function createTileLayer(){
+  const tileData = window.__OFFLINE_TILE_DATA__;
+  if (tileData) {
+    const OfflineTileLayer = L.TileLayer.extend({
+      getTileUrl: function(coords){
+        const key = `${coords.z}/${coords.x}/${coords.y}`;
+        return tileData[key] || ""; // vuoto = tile non incorporata, resta bianca
+      }
+    });
+    return new OfflineTileLayer("", { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
+  }
+  return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  });
+}
+
 function initMap() {
   if (map) return;
   map = L.map('map', { zoomControl: false }).setView([42.31, 13.45], 11);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+  createTileLayer().addTo(map);
 
   updateMapMarkers();
   startContinuousTracking(); // Tracciamento automatico all'apertura
@@ -1293,19 +1310,14 @@ function stopTracking(manual) {
   }
 }
 
-/* DOWNLOAD OFFLINE: percorsi (OSRM) + tile mappa, per uso senza rete */
+/* SALVA PAGINA OFFLINE: genera un unico file .html autonomo, con dentro tutti i percorsi
+   già calcolati e la libreria mappa inclusa, scaricabile sul telefono e apribile senza rete.
+   Le tile stradali (immagini di sfondo della mappa) restano "solo se c'è rete": OpenStreetMap
+   non permette di scaricarle in blocco e comunque il tracciamento (GPS, percorso, allarme
+   fermata) funziona a prescindere, disegnando la linea del percorso anche a schermo vuoto. */
 
-const TILE_CACHE_NAME = "orari-bus-v1"; // deve combaciare con CACHE_NAME in sw.js
-const OFFLINE_ZOOM_MIN = 11, OFFLINE_ZOOM_MAX = 16; // stessa gamma di zoom usata dall'app
-
-function lon2tileX(lon, z){ return Math.floor((lon + 180) / 360 * Math.pow(2, z)); }
-function lat2tileY(lat, z){
-  const r = lat * Math.PI / 180;
-  return Math.floor((1 - Math.log(Math.tan(r) + 1/Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z));
-}
-
-// Tutte le combinazioni linea/direzione (con relativi via-point) che l'app può disegnare come
-// percorso: sono le stesse liste usate da currentViaPoints()/fetchOSRMRoute() a runtime.
+// Tutte le combinazioni linea/direzione (con relativi via-point) i cui percorsi vanno
+// scaricati da OSRM: le stesse liste usate da currentViaPoints()/fetchOSRMRoute() a runtime.
 function buildAllRouteCombos(){
   const combos = [];
   combos.push(OCRE_CHECKPOINTS.map(cp => ({ lat: cp.lat, lng: cp.lng })));
@@ -1348,6 +1360,29 @@ async function downloadAllRoutes(onProgress){
   return combos;
 }
 
+// Raccoglie tutte le geometrie dei percorsi già scaricate (chiavi localStorage "osrm:...")
+// in un unico oggetto {coordsStr: coordinates} da incorporare nel file offline.
+function collectAllCachedRoutes(){
+  const out = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('osrm:')) {
+      try { out[key.slice(5)] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+    }
+  }
+  return out;
+}
+
+// Zoom coperti dalle tile incorporate: dallo zoom iniziale della mappa (11) fino al massimo
+// usato durante il tracciamento in navigazione (16).
+const OFFLINE_ZOOM_MIN = 12, OFFLINE_ZOOM_MAX = 16;
+
+function lon2tileX(lon, z){ return Math.floor((lon + 180) / 360 * Math.pow(2, z)); }
+function lat2tileY(lat, z){
+  const r = lat * Math.PI / 180;
+  return Math.floor((1 - Math.log(Math.tan(r) + 1/Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z));
+}
+
 function buildTileListForCombos(combos){
   let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
   combos.forEach(points => points.forEach(p => {
@@ -1356,53 +1391,117 @@ function buildTileListForCombos(combos){
     if (p.lng < minLng) minLng = p.lng;
     if (p.lng > maxLng) maxLng = p.lng;
   }));
-  const buf = 0.02; // margine attorno ai corridoi, per avere contesto sulla mappa
+  const buf = 0.015; // margine attorno ai corridoi, per un minimo di contesto sulla mappa
   minLat -= buf; maxLat += buf; minLng -= buf; maxLng += buf;
 
-  const tileSet = new Set();
+  const tiles = [];
   for (let z = OFFLINE_ZOOM_MIN; z <= OFFLINE_ZOOM_MAX; z++) {
     const xMin = lon2tileX(minLng, z), xMax = lon2tileX(maxLng, z);
     const yMin = lat2tileY(maxLat, z), yMax = lat2tileY(minLat, z); // lat invertita
     for (let x = xMin; x <= xMax; x++) {
-      for (let y = yMin; y <= yMax; y++) {
-        tileSet.add(`${z}/${x}/${y}`);
-      }
+      for (let y = yMin; y <= yMax; y++) tiles.push({ z, x, y });
     }
   }
-  return Array.from(tileSet);
+  return tiles;
 }
 
-async function downloadAllTiles(onProgress){
+function blobToDataURL(blob){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Scarica ogni tile come immagine e la converte in una stringa incorporabile direttamente
+// nell'HTML (nessuna richiesta di rete quando poi apri il file offline). Le tile che
+// falliscono (es. server irraggiungibile) vengono semplicemente saltate: il resto del file
+// (orari, percorsi, allarme) si genera comunque.
+async function downloadAllTilesAsDataUrls(onProgress){
   const combos = buildAllRouteCombos();
   const tiles = buildTileListForCombos(combos);
-  const cache = await caches.open(TILE_CACHE_NAME);
-
+  const out = {};
   let done = 0;
-  const concurrency = 6;
+  const concurrency = 4;
   let idx = 0;
 
   async function worker(){
     while (idx < tiles.length) {
-      const myIdx = idx++;
-      const [z, x, y] = tiles[myIdx].split('/');
-      const url = `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+      const t = tiles[idx++];
+      const url = `https://tile.openstreetmap.org/${t.z}/${t.x}/${t.y}.png`;
       try {
-        // mode 'no-cors': i server tile OSM spesso non inviano header CORS. La risposta è
-        // "opaca" (non leggibile da JS) ma è comunque perfettamente valida da mettere in
-        // cache e servire in seguito a un tag <img> (che è come Leaflet mostra le tile).
-        const already = await cache.match(url);
-        if (!already) {
-          const res = await fetch(url, { mode: 'no-cors' });
-          await cache.put(url, res);
+        const res = await fetch(url);
+        if (res.ok) {
+          const blob = await res.blob();
+          out[`${t.z}/${t.x}/${t.y}`] = await blobToDataURL(blob);
         }
-      } catch(e) { /* tile singola non scaricata: non blocchiamo il resto */ }
+      } catch(e) { /* singola tile non scaricata: si prosegue con le altre */ }
       done++;
       if (onProgress) onProgress(done, tiles.length);
     }
   }
 
   await Promise.all(Array.from({length: concurrency}, worker));
-  return tiles.length;
+  return out;
+}
+
+async function buildStandaloneOfflineHtml(onTileProgress){
+  // Libreria Leaflet incorporata (altrimenti, senza rete, la mappa non potrebbe caricarla da CDN).
+  const [leafletCss, leafletJs] = await Promise.all([
+    fetch("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css").then(r => r.text()),
+    fetch("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js").then(r => r.text())
+  ]);
+
+  const routeData = collectAllCachedRoutes();
+  const tileData = await downloadAllTilesAsDataUrls(onTileProgress);
+
+  const seedScript =
+    `<script id="offline-seed">\n` +
+    `(function(){\n` +
+    `  var ROUTE_DATA = ${JSON.stringify(routeData)};\n` +
+    `  Object.keys(ROUTE_DATA).forEach(function(k){\n` +
+    `    try { localStorage.setItem('osrm:'+k, JSON.stringify(ROUTE_DATA[k])); } catch(e){}\n` +
+    `  });\n` +
+    `  window.__OFFLINE_TILE_DATA__ = ${JSON.stringify(tileData)};\n` +
+    `  window.__OFFLINE_BUNDLE__ = true;\n` +
+    `})();\n` +
+    `<\/script>`;
+
+  // Cloniamo la pagina così com'è ora (stessa struttura, stessi script applicativi) e
+  // sostituiamo solo i riferimenti esterni con le versioni incorporate.
+  let html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+  html = html.replace(
+    /<link rel="stylesheet" href="https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.css"\s*\/?>/,
+    `<style>${leafletCss}</style>`
+  );
+  html = html.replace(
+    /<script src="https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.js"><\/script>/,
+    `<script>${leafletJs}<\/script>`
+  );
+  // Il service worker non funziona aprendo un file dal telefono (richiede un sito https):
+  // lo togliamo per evitare errori inutili in console nel file offline.
+  html = html.replace(
+    /<script>\s*if \('serviceWorker' in navigator\)[\s\S]*?<\/script>/,
+    ""
+  );
+  // Inseriamo il seed dei percorsi appena prima dello script principale dell'app.
+  html = html.replace('<script>\n/* COORDINATE CHECKPOINT', seedScript + '\n<script>\n/* COORDINATE CHECKPOINT');
+
+  return html;
+}
+
+function triggerHtmlDownload(html, filename){
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 function setOfflineUI(state, text){
@@ -1414,7 +1513,7 @@ function setOfflineUI(state, text){
 
   btn.classList.remove('busy', 'ready');
   if (state === 'busy') { btn.classList.add('busy'); btn.textContent = "In corso…"; track.style.display = 'block'; }
-  else if (state === 'ready') { btn.classList.add('ready'); btn.textContent = "Aggiorna"; track.style.display = 'none'; }
+  else if (state === 'ready') { btn.classList.add('ready'); btn.textContent = "Rigenera"; track.style.display = 'none'; }
   else { btn.textContent = "Scarica"; track.style.display = 'none'; }
 
   if (text !== undefined) status.textContent = text;
@@ -1423,9 +1522,9 @@ function setOfflineUI(state, text){
     const savedAt = localStorage.getItem('offlineDataSavedAt');
     if (state !== 'busy' && savedAt) {
       const d = new Date(parseInt(savedAt, 10));
-      sub.textContent = `Ultimo aggiornamento: ${pad(d.getDate())}/${pad(d.getMonth()+1)} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      sub.textContent = `Ultimo file generato: ${pad(d.getDate())}/${pad(d.getMonth()+1)} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     } else if (state !== 'busy') {
-      sub.textContent = "Scarica percorsi e mappa per usarli senza rete";
+      sub.textContent = "Include orari, percorsi e mappa: apribile senza rete";
     }
   } catch(e) {}
 }
@@ -1435,7 +1534,7 @@ async function startOfflineDownload(){
   if (btn.classList.contains('busy')) return;
 
   if (!navigator.onLine) {
-    setOfflineUI('idle', "Sei offline: connettiti a internet (meglio col wifi) e riprova.");
+    setOfflineUI('idle', "Sei offline: connettiti a internet e riprova a generare il file.");
     return;
   }
 
@@ -1443,25 +1542,25 @@ async function startOfflineDownload(){
   const fill = document.getElementById('offlineProgressFill');
 
   try {
-    if ('storage' in navigator && navigator.storage.persist) {
-      navigator.storage.persist().catch(()=>{});
-    }
-
     await downloadAllRoutes((done, total) => {
-      fill.style.width = `${Math.round((done/total)*40)}%`; // percorsi = 40% della barra
+      fill.style.width = `${Math.round((done/total)*20)}%`; // percorsi = 20% della barra
       document.getElementById('offlineStatus').textContent = `Percorsi: ${done}/${total}`;
     });
 
-    await downloadAllTiles((done, total) => {
-      fill.style.width = `${40 + Math.round((done/total)*60)}%`; // tile = restante 60%
-      document.getElementById('offlineStatus').textContent = `Tile mappa: ${done}/${total}`;
+    document.getElementById('offlineStatus').textContent = "Scarico le immagini della mappa…";
+    const html = await buildStandaloneOfflineHtml((done, total) => {
+      fill.style.width = `${20 + Math.round((done/total)*75)}%`; // tile = 75% della barra
+      document.getElementById('offlineStatus').textContent = `Mappa: ${done}/${total} immagini`;
     });
+    fill.style.width = "100%";
+
+    triggerHtmlDownload(html, "orari-bus-offline.html");
 
     localStorage.setItem('offlineDataSavedAt', String(Date.now()));
-    setOfflineUI('ready', "Fatto! Percorsi e mappa disponibili anche senza rete.");
+    setOfflineUI('ready', "Fatto! Trovi \"orari-bus-offline.html\" nei Download del telefono: aprilo da lì anche senza rete.");
   } catch(e) {
-    console.log("Errore download offline:", e);
-    setOfflineUI('idle', "Download non completato, riprova con una connessione migliore.");
+    console.log("Errore generazione file offline:", e);
+    setOfflineUI('idle', "Generazione non riuscita, riprova con una connessione migliore.");
   }
 }
 
