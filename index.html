@@ -28,8 +28,8 @@
     --border: #2b3444;
     --border-soft: #212938;
     --text: #eef1f6;
-    --text-dim: #8993a4;
-    --text-faint: #5c6577;
+    --text-dim: #aab3c4;
+    --text-faint: #838da0;
 
     --amber: #f5a524;
     --amber-strong: #ffb946;
@@ -162,44 +162,32 @@
   }
   .tab-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
 
-  /* Pannello "prossima corsa" in stile biglietto del bus */
+  /* Pannello "prossima corsa": stessa estetica sobria della card "corsa selezionata" */
   .next-card{
-    border-radius: 20px; padding: 22px 20px 18px;
-    background: linear-gradient(165deg, var(--surface-2), var(--bg-2) 78%);
-    border: 1px solid var(--border);
-    margin-bottom: 22px; position: relative; overflow:hidden;
+    border-radius: 16px; padding: 15px 17px;
+    background: var(--surface); border: 1px solid var(--amber);
+    margin-bottom: 22px; position: relative;
     box-shadow: var(--shadow), var(--shadow-inset);
   }
-  .next-card::before{
-    content:""; position:absolute; top:0; left:0; right:0; height:3px;
-    background: var(--amber);
-    opacity:.9;
-  }
-  .next-card::after{
-    content:"🚌"; position:absolute; right:-14px; bottom:-22px; font-size:110px;
-    opacity:0.05; transform: rotate(-8deg); pointer-events:none; filter: grayscale(1);
-  }
   .next-label{
-    display:inline-flex; align-items:center; gap:6px;
-    font-size: 10.5px; color: #1c1305; font-weight: 800; margin-bottom: 14px;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    background: linear-gradient(160deg, var(--amber-strong), var(--amber));
-    padding: 5px 10px 5px 8px; border-radius: 7px;
-    box-shadow: 0 2px 0 #8a5300;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size: 10.5px; color: var(--amber-strong); font-weight: 700; margin-bottom: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
   }
-  .next-main{ display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+  .next-label .when-chip{
+    font-size: 11px; font-weight: 800; color: #241804; text-transform:none; letter-spacing:0;
+    background: linear-gradient(160deg, var(--amber-strong), var(--amber));
+    padding: 4px 9px; border-radius: 7px; white-space:nowrap;
+  }
+  .next-main{ display:flex; align-items:center; gap:13px; }
   .roundel{
-    flex:none; width: 46px; height:46px; border-radius: 50%; display:flex; align-items:center; justify-content:center;
+    flex:none; width: 44px; height:44px; border-radius: 50%; display:flex; align-items:center; justify-content:center;
     font-family:'JetBrains Mono', monospace; font-weight:800; font-size: 12px; color: #10131a;
     box-shadow: inset 0 2px 3px rgba(255,255,255,0.35), inset 0 -3px 4px rgba(0,0,0,0.25), 0 6px 12px -6px rgba(0,0,0,0.6);
   }
-  .next-times{ font-family:'JetBrains Mono', monospace; font-size: 30px; font-weight: 800; line-height:1.1; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
+  .next-times{ font-family:'JetBrains Mono', monospace; font-size: 28px; font-weight: 800; line-height:1.1; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
   .next-times small{ color: var(--text-faint); font-weight: 500; }
-  .next-sub{ margin-top: 11px; font-size: 13px; color: var(--text-dim); position:relative; z-index:1; }
-  .next-divider{
-    border:none; border-top: 3px dashed rgba(245,165,36,0.45); margin: 14px 0 0; height:0;
-  }
-  .next-when{ margin-top: 13px; font-size: 13px; color: var(--amber-strong); font-weight: 700; display:inline-flex; align-items:center; gap:6px; position:relative; z-index:1; }
+  .next-sub{ margin-top: 10px; font-size: 13px; color: var(--text-dim); }
 
   .map-card{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 13px; margin-bottom: 22px; box-shadow: var(--shadow-sm), var(--shadow-inset); }
   .map-header{ display: flex; flex-direction: column; align-items: stretch; gap: 9px; margin-bottom: 9px; }
@@ -290,7 +278,17 @@
 
   .selected-card{ border-radius: 16px; padding: 15px 17px; background: var(--surface); border: 1px solid var(--amber); margin-bottom: 18px; position:relative; box-shadow: var(--shadow), var(--shadow-inset); }
   .selected-card .closebtn{ position:absolute; top:11px; right:13px; color:var(--text-dim); font-size:16px; cursor:pointer; }
-  .selected-label{ font-size: 10.5px; color: var(--amber-strong); font-weight: 700; margin-bottom: 9px; letter-spacing:.08em; text-transform: uppercase; }
+  .selected-label{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size: 10.5px; color: var(--amber-strong); font-weight: 700; margin-bottom: 9px;
+    letter-spacing:.08em; text-transform: uppercase; padding-right: 22px;
+  }
+  .selected-label .when-chip{
+    font-size: 11px; font-weight: 800; color: #241804; text-transform:none; letter-spacing:0;
+    background: linear-gradient(160deg, var(--amber-strong), var(--amber));
+    padding: 4px 9px; border-radius: 7px; white-space:nowrap;
+  }
+  .selected-label.tracking .when-chip{ background: linear-gradient(160deg, #ff8a9c, var(--danger)); color:#2a0208; }
   .roundel-sm{
     flex:none; width: 36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     font-family:'JetBrains Mono', monospace; font-weight:800; font-size: 10.5px; color:#10131a;
@@ -491,34 +489,34 @@ const demetrioToAQ = [
 ];
 
 const ocreFromAQ = [
-  {p:"06:00", a:"06:21", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"06:45", a:"07:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"08:10", a:"08:31", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"11:10", a:"11:31", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"11:10", a:"11:31", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"13:15", a:"13:36", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"solo sab", giorno:d=>d===6},
-  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"lun–ven", giorno:d=>d>=1&&d<=5},
-  {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
+  {p:"06:00", a:"06:21", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"06:45", a:"07:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:10", a:"08:31", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"11:10", a:"11:31", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"solo sab", giorno:d=>d===6},
+  {p:"13:15", a:"13:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"lun–ven", giorno:d=>d>=1&&d<=5},
+  {p:"13:55", a:"14:16", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"16:15", a:"16:36", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"17:35", a:"17:56", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"19:45", a:"20:06", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"}
 ];
 
 const ocreToAQ = [
-  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"tranne mar", giorno:d=>d!==2},
-  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo", giornoTag:"martedì", giorno:d=>d===2},
-  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"},
-  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo"}
+  {p:"07:20", a:"07:45", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"08:20", a:"08:45", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"09:35", a:"10:00", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"12:45", a:"13:10", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"14:09", a:"14:40", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FNS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"15:24", a:"15:50", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"tranne mar", giorno:d=>d!==2},
+  {p:"15:29", a:"15:55", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila", giornoTag:"martedì", giorno:d=>d===2},
+  {p:"17:44", a:"18:15", linea:"2007", tipo:"FS", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"19:10", a:"19:35", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"},
+  {p:"20:59", a:"21:25", linea:"2007", tipo:"FA", nome:"Avezzano-Rocca di Mezzo-L'Aquila"}
 ];
 
 const ROUTES = {
@@ -1376,25 +1374,35 @@ function findNextDeparture(){
   return null;
 }
 
+// Restituisce una stringa leggibile per il conto alla rovescia di una corsa in una data.
+function formatDepartureWhen(trip, date){
+  const now = new Date();
+  const dep = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ...trip.p.split(":").map(Number));
+  const isToday = dateStr(date)===dateStr(now);
+  if(!isToday) return `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  const diffMin = Math.round((dep-now)/60000);
+  if(diffMin > 0) return diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`;
+  const dur = tripDuration(trip);
+  if(diffMin > -dur) return "in viaggio";
+  return "già partita";
+}
+
 function renderNextCard(){
   const card = document.getElementById("nextCard");
   if (state.selectedTripKey) { card.style.display = "none"; card.innerHTML = ""; return; }
   card.style.display = "block";
   const found = findNextDeparture();
   if(!found){ card.innerHTML = `<div class="next-label">Prossima corsa</div><div>Nessuna corsa nei prossimi giorni.</div>`; return; }
-  const {trip, date, dep} = found; const now = new Date();
-  const diffMin = Math.round((dep-now)/60000);
-  const when = dateStr(date)===dateStr(now) ? (diffMin<60 ? `tra ${diffMin} min` : `tra ${Math.floor(diffMin/60)}h ${diffMin%60}m`) : `${WD[date.getDay()]} ${date.getDate()} ${MO[date.getMonth()]}, ore ${trip.p}`;
+  const {trip, date} = found;
+  const when = formatDepartureWhen(trip, date);
   const dirInfo = ROUTES[state.route].directions[state.dir];
   card.innerHTML = `
-    <div class="next-label">PROSSIMA CORSA IN PARTENZA</div>
+    <div class="next-label">PROSSIMA CORSA IN PARTENZA <span class="when-chip">${when}</span></div>
     <div class="next-main">
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
     </div>
     <div class="next-sub">Linea ${trip.nome} • Da <b>${dirInfo.depStop}</b> a <b>${tripArrStopLabel(trip, dirInfo)}</b></div>
-    <div class="next-divider"></div>
-    <div class="next-when">⏱️ Partenza ${when}</div>
   `;
 }
 
@@ -1443,12 +1451,16 @@ function renderSelectedCard(){
   if(!trip){ card.style.display = "none"; state.selectedTripKey = null; return; }
 
   const extras = tripExtrasHtml(trip);
+  const when = formatDepartureWhen(trip, state.viewedDate);
 
   card.style.display = "block";
   card.style.borderColor = trackingActive ? "var(--danger)" : "var(--amber)";
   card.innerHTML = `
     <span class="closebtn" onclick="if(trackingActive) stopTracking(true); state.selectedTripKey=null; lastPassedCPIndex=-1; lastCutIndex=0; stopAlertTriggered=false; renderNextCard(); renderTripList(); renderSelectedCard(); updateMapMarkers(); updateTrackButtonUI();">✕</span>
-    <div class="selected-label" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</div>
+    <div class="selected-label ${trackingActive ? 'tracking' : ''}" style="color:${trackingActive ? 'var(--danger)' : 'var(--amber)'}">
+      <span>${trackingActive ? "🔴 TRACKING IN CORSO" : "CORSA SELEZIONATA"}</span>
+      <span class="when-chip">${when}</span>
+    </div>
     <div class="next-main">
       <div class="roundel" style="background:${LINE_COLORS[trip.linea]||'#888'}">${trip.linea}</div>
       <div class="next-times">${trip.p} <small>→</small> ${trip.a}</div>
