@@ -923,6 +923,10 @@ function updateUserLocation(pos) {
   badge.textContent = `GPS Attivo (${Math.round(speed)} km/h)`;
   badge.style.color = "var(--green)";
 
+  // Tutto il resto (avanzamento, barra di progresso, checkpoint, autozoom, alert) dipende
+  // dal tracking: se non hai premuto "Attiva Alert" restiamo solo a mostrare il tuo puntino.
+  if (!trackingActive) return;
+
   // Avanzamento continuo lungo il tracciato stradale (funziona per qualsiasi tratta, con o senza checkpoint)
   const nearIdx = nearestRouteIndex(lat, lng);
   if (nearIdx !== null && nearIdx > lastCutIndex) {
@@ -932,7 +936,7 @@ function updateUserLocation(pos) {
 
   // Autozoom "da navigatore": durante il tracking, la mappa segue tenendo d'occhio
   // l'ultima fermata passata, la tua posizione e le prossime 2-3 fermate.
-  if (trackingActive) updateNavigatorView(userCoords);
+  updateNavigatorView(userCoords);
 
   // Aggiorna lo stato "passato" dei checkpoint etichettati, se presenti per questa tratta/linea
   const viaPoints = currentViaPoints();
@@ -950,8 +954,8 @@ function updateUserLocation(pos) {
   const { arr } = getRouteCoords();
   const distToArr = getDistanceMeters(lat, lng, arr.lat, arr.lng);
 
-  // Arrivo rilevato: se il tracking è attivo, si ferma da solo
-  if (trackingActive && distToArr < ARRIVED_DISTANCE_METERS) {
+  // Arrivo rilevato: il tracking si ferma da solo
+  if (distToArr < ARRIVED_DISTANCE_METERS) {
     stopTracking(false);
     return;
   }
@@ -1110,6 +1114,9 @@ function toggleTracking() {
   if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
   }
+  // Vibrazione breve di conferma: partendo da un tap (gesto utente) alcuni browser/webview
+  // richiedono proprio questo per "sbloccare" la vibrazione anche per gli alert successivi.
+  if ("vibrate" in navigator) navigator.vibrate(80);
 
   trackingActive = true;
   stopAlertTriggered = false;
