@@ -1225,12 +1225,29 @@ function triggerStopNotification(stopLabel, reason) {
     stopAlertVibrateInterval = setInterval(() => navigator.vibrate([1000, 250, 1000]), 3000);
   }
 
+  // Preferisci una notifica di sistema gestita dal service worker della PWA.
+  // Questo migliora la compatibilità quando la pagina è in secondo piano, ma non
+  // può riattivare il GPS se Android sospende completamente la pagina.
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, {
+    const options = {
       body: msg,
-      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
-      vibrate: [1000, 250, 1000, 250, 1000]
-    });
+      icon: "./icon.svg",
+      badge: "./icon.svg",
+      tag: "oraribus-stop-alert",
+      renotify: true,
+      requireInteraction: true,
+      vibrate: [1000, 250, 1000, 250, 1000],
+      data: { url: "./index.html" }
+    };
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready
+        .then(registration => registration.showNotification(title, options))
+        .catch(() => {
+          try { new Notification(title, options); } catch(e) {}
+        });
+    } else {
+      try { new Notification(title, options); } catch(e) {}
+    }
   }
 }
 

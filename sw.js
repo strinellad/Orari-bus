@@ -1,4 +1,4 @@
-const CACHE_NAME = "orari-bus-v2";
+const CACHE_NAME = "orari-bus-v3";
 
 // File dell'app stessa (guscio statico): questi vengono messi in cache subito
 // all'installazione, così l'app si apre anche offline.
@@ -23,6 +23,23 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = new URL("./index.html", self.location.href).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(targetUrl);
+    })
+  );
 });
 
 self.addEventListener("fetch", (event) => {
