@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Orari Bus · San Demetrio / San Panfilo ⇄ L'Aquila</title>
+<meta name="description" content="Orari delle corse bus tra San Demetrio, San Panfilo e L’Aquila, con calendario, mappa e avvisi.">
 <link rel="manifest" href="manifest.json">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -353,6 +354,22 @@
   ::-webkit-scrollbar{ width: 8px; height: 8px; }
   ::-webkit-scrollbar-track{ background: transparent; }
   ::-webkit-scrollbar-thumb{ background: var(--surface-3); border-radius: 8px; }
+
+  /* Accessibilità e leggibilità: focus visibile, movimento ridotto e target touch più chiari. */
+  :focus-visible{ outline:3px solid var(--amber-strong); outline-offset:3px; }
+  .tab[role="button"], .dirbtn[role="button"], .trip[role="button"]{ -webkit-tap-highlight-color:transparent; }
+  .trip[role="button"]:focus-visible, .tab[role="button"]:focus-visible, .dirbtn[role="button"]:focus-visible{
+    border-color:var(--amber-strong); box-shadow:0 0 0 2px rgba(255,185,70,.24);
+  }
+  @media (max-width:360px){
+    .wrap{padding-left:12px;padding-right:12px}
+    .next-times{font-size:23px}.trip-times{font-size:14px}
+    .tab{padding:12px 5px;font-size:12px}.dateLabel{min-width:0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  }
+
 </style>
 </head>
 <body>
@@ -1633,12 +1650,24 @@ function startRssCarousel() {
   }, 5000);
 }
 
+
+function makeKeyboardActivatable(el, label, selected){
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
+  el.setAttribute("aria-label", label);
+  el.setAttribute("aria-pressed", String(!!selected));
+  el.addEventListener("keydown", event => {
+    if(event.key === "Enter" || event.key === " "){ event.preventDefault(); el.click(); }
+  });
+}
+
 function renderTabs(){
   const routeTabs = document.getElementById("routeTabs"); routeTabs.innerHTML = "";
   Object.entries(ROUTES).forEach(([key,r])=>{
     const el = document.createElement("div");
     el.className = "tab " + (key==="ocre" ? "route-ocre" : "route-demetrio") + (state.route===key ? " active":"");
     el.innerHTML = `<span class="tab-dot" style="background:${key==="ocre" ? "var(--route-ocre)" : "var(--route-demetrio)"}"></span> ${r.label}`;
+    makeKeyboardActivatable(el, r.label, state.route===key);
     el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.route=key; state.dir="fromAQ"; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     routeTabs.appendChild(el);
   });
@@ -1648,6 +1677,7 @@ function renderTabs(){
     const el = document.createElement("div");
     el.className = "dirbtn " + (key==="fromAQ" ? "dir-andata" : "dir-ritorno") + (state.dir===key ? " active":"");
     el.textContent = d.label;
+    makeKeyboardActivatable(el, d.label, state.dir===key);
     el.onclick = ()=>{ if(trackingActive) stopTracking(true); state.dir=key; state.selectedTripKey=null; lastPassedCPIndex = -1; lastCutIndex = 0; stopAlertTriggered = false; renderAll(); updateMapMarkers(); };
     dirTabs.appendChild(el);
   });
@@ -1761,6 +1791,7 @@ function renderTripList(){
       <div class="trip-sub">Da ${dirInfo.depStop} a ${tripArrStopLabel(trip, dirInfo)}</div>
       ${extras ? `<div class="trip-extra">${extras}</div>` : ""}
     `;
+    makeKeyboardActivatable(el, "Linea " + trip.linea + ", " + trip.p + " - " + trip.a + ", " + trip.nome, state.selectedTripKey===key);
     el.onclick = ()=>{
       if(trackingActive && state.selectedTripKey===key){ stopTracking(true); }
       state.selectedTripKey = (state.selectedTripKey===key ? null : key);
